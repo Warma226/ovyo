@@ -44,18 +44,44 @@ export type Post = {
 
 export { DEFAULT_SETTINGS, mergeSettings, type Settings } from "./settings";
 import { DEFAULT_SETTINGS, mergeSettings, type Settings } from "./settings";
+import { espaceCourant } from "./espace";
 
 let client: SupabaseClient | null = null;
 export function isDemo() {
   return !(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
-export function db(): SupabaseClient {
+// Accès brut à la base, sans espace : réservé aux tables de la plateforme (ov_espaces) et à la connexion.
+export function dbBrut(): SupabaseClient {
   if (!client) {
     client = createClient(process.env.SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE_KEY as string, {
       auth: { persistSession: false },
     });
   }
   return client;
+}
+
+// Accès aux données d'UN espace client : la table « x » devient « ov_x », chaque lecture, modification ou
+// suppression est filtrée sur l'espace, chaque ajout reçoit son espace_id. Sans espace connu : refus.
+type Lignes = Record<string, unknown> | Record<string, unknown>[];
+export function db(espace?: string): SupabaseClient {
+  const E = espace ?? espaceCourant();
+  if (!E) throw new Error("Espace client inconnu : reconnectez-vous.");
+  const base = dbBrut();
+  const avecE = (r: Lignes) => (Array.isArray(r) ? r.map((x) => ({ ...x, espace_id: E })) : { ...r, espace_id: E });
+  return {
+    from(table: string) {
+      const q = base.from(`ov_${table}`);
+      return {
+        select: (...a: Parameters<typeof q.select>) => q.select(...a).eq("espace_id", E),
+        update: (v: Record<string, unknown>, o?: Parameters<typeof q.update>[1]) => q.update({ ...v, espace_id: E }, o).eq("espace_id", E),
+        delete: (o?: Parameters<typeof q.delete>[0]) => q.delete(o).eq("espace_id", E),
+        insert: (r: Lignes, o?: Parameters<typeof q.insert>[1]) => q.insert(avecE(r), o),
+        upsert: (r: Lignes, o?: Parameters<typeof q.upsert>[1]) => q.upsert(avecE(r), o),
+      };
+    },
+    storage: base.storage,
+    rpc: base.rpc.bind(base),
+  } as unknown as SupabaseClient;
 }
 
 type Mem = { posts: Post[]; settings: Settings; seen: Set<string> };

@@ -1,8 +1,9 @@
 // Stockage des images importées depuis le téléphone (tes visuels, photos de fond).
 // 1. Supabase Storage (seau public « visuels », créé automatiquement) ; 2. sinon la médiathèque WordPress.
 import { db, isDemo } from "./store";
+import { espaceCourant } from "./espace";
 
-const BUCKET = "visuels";
+const BUCKET = "ovyo"; // un dossier par espace client
 let bucketReady = false;
 
 async function supabaseUpload(bytes: ArrayBuffer, type: string, name: string): Promise<string> {
@@ -15,6 +16,7 @@ async function supabaseUpload(bytes: ArrayBuffer, type: string, name: string): P
     }
     bucketReady = true;
   }
+  name = `${espaceCourant() ?? "commun"}/${name}`;
   const { error } = await storage.from(BUCKET).upload(name, bytes, { contentType: type, upsert: false });
   if (error) throw new Error(`Stockage Supabase : ${error.message}`);
   return storage.from(BUCKET).getPublicUrl(name).data.publicUrl;

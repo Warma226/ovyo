@@ -1,9 +1,10 @@
 // Équipe : comptes des membres, invitations, sessions par appareil. Côté serveur uniquement.
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from "node:crypto";
 import { headers } from "next/headers";
-import { db } from "./store";
+import { db, dbBrut } from "./store";
 import { ROLES_MEMBRES, type Role } from "./roles";
 import { SESSION_DAYS } from "./session";
+import { avecEspace } from "./espace";
 
 export type Membre = { id: string; nom: string; contact: string; role: Role; statut: "invite" | "actif" | "suspendu"; created_at: string; derniere_connexion: string | null; invitation_expire: string | null };
 const CHAMPS = "id,nom,contact,role,statut,created_at,derniere_connexion,invitation_expire";
@@ -29,7 +30,7 @@ export function mdpValide(mdp: string): string | null {
 // Qui fait la requête (en-têtes posés par le middleware)
 export async function moi(): Promise<{ uid: string; role: Role; sid: string | null }> {
   const h = await headers();
-  return { uid: h.get("x-tuvoa-uid") || "admin", role: (h.get("x-tuvoa-role") as Role) || "admin", sid: h.get("x-tuvoa-sid") || null };
+  return { uid: h.get("x-ovyo-uid") || "", role: (h.get("x-ovyo-role") as Role) || "lecteur" as Role, sid: h.get("x-ovyo-sid") || null };
 }
 
 // Profil de l'administrateur principal (settings, ligne 6)
@@ -59,6 +60,16 @@ export async function membreParContact(contact: string) {
   return data as (Membre & { mdp_hash: string | null }) | null;
 }
 
+// Connexion : le contact est unique sur toute la plateforme, il désigne le membre ET son espace client.
+export async function membreConnexion(contact: string) {
+  const { data } = await dbBrut().from("ov_membres").select(`${CHAMPS},mdp_hash,espace_id`).ilike("contact", contact.trim()).limit(1).maybeSingle();
+  return data as (Membre & { mdp_hash: string | null; espace_id: string }) | null;
+}
+export async function contactPris(contact: string): Promise<boolean> {
+  const { data } = await dbBrut().from("ov_membres").select("id").ilike("contact", contact.trim()).limit(1);
+  return (data ?? []).length > 0;
+}
+
 function nouveauJeton() {
   const jeton = randomBytes(24).toString("base64url");
   return { jeton, invitation_hash: empreinte(jeton), invitation_expire: new Date(Date.now() + 7 * 864e5).toISOString() };
@@ -66,7 +77,7 @@ function nouveauJeton() {
 export async function inviter(nom: string, contact: string, role: Role) {
   if (!nom.trim() || !contact.trim()) throw new Error("Indiquez le nom et l'e-mail ou le téléphone.");
   if (!ROLES_MEMBRES.includes(role)) throw new Error("Rôle inconnu.");
-  if (await membreParContact(contact)) throw new Error("Ce contact fait déjà partie de l'équipe.");
+  if (await contactPris(contact)) throw new Error("Ce contact a déjà un compte Ovyo.");
   const j = nouveauJeton();
   const { data, error } = await db().from("membres").insert({ nom: nom.trim().slice(0, 60), contact: contact.trim().slice(0, 120), role, statut: "invite", invitation_hash: j.invitation_hash, invitation_expire: j.invitation_expire }).select("id").single();
   if (error) throw new Error(error.message);
@@ -80,8 +91,8 @@ export async function renouvelerInvitation(id: string) {
 }
 export async function invitationValide(jeton: string) {
   if (!jeton) return null;
-  const { data } = await db().from("membres").select(`${CHAMPS},invitation_hash`).eq("invitation_hash", empreinte(jeton)).maybeSingle();
-  const m = data as (Membre & { invitation_hash: string }) | null;
+  const { data } = await dbBrut().from("ov_membres").select(`${CHAMPS},invitation_hash,espace_id`).eq("invitation_hash", empreinte(jeton)).maybeSingle();
+  const m = data as (Membre & { invitation_hash: string; espace_id: string }) | null;
   if (!m || m.statut === "suspendu" || !m.invitation_expire || new Date(m.invitation_expire).getTime() < Date.now()) return null;
   return m;
 }
@@ -89,9 +100,9 @@ export async function accepterInvitation(jeton: string, mdp: string) {
   const m = await invitationValide(jeton);
   if (!m) throw new Error("Ce lien d'invitation n'est plus valable. Demandez-en un nouveau à l'administration.");
   const err = mdpValide(mdp); if (err) throw new Error(err);
-  const { error } = await db().from("membres").update({ mdp_hash: hacher(mdp), statut: "actif", invitation_hash: null, invitation_expire: null }).eq("id", m.id);
+  const { error } = await db(m.espace_id).from("membres").update({ mdp_hash: hacher(mdp), statut: "actif", invitation_hash: null, invitation_expire: null }).eq("id", m.id);
   if (error) throw new Error(error.message);
-  await fermerSessions(m.id);
+  await avecEspace(m.espace_id, () => fermerSessions(m.id));
   return m;
 }
 export async function majMembre(id: string, p: Partial<Pick<Membre, "nom" | "role" | "statut">>) {

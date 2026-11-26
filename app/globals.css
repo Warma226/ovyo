@@ -1153,3 +1153,43 @@ h1, h2, h3, .section-title, .topbar .title, .tv-h2, .tv-titre, .tv-studio-h2, .t
 .tv-ap-onglets i, .tv-ap-tel .tete .av { background: var(--bleu); }
 .tv-minute-liste .vignette { background: linear-gradient(170deg, #1e3a8a, #2563eb); }
 .tv-side-pilote .tv-led { box-shadow: 0 0 0 4px rgba(34,197,94,0.18); }
+
+/* ─── Ovyo : connexion et inscription ─────────────────────────── */
+.ova{min-height:100dvh;display:grid;grid-template-columns:minmax(0,1fr);background:#F4F6FA;font-family:var(--font-jakarta),system-ui,sans-serif;color:#0B1220}
+.ova-pub{display:none}
+.ova-main{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px;gap:16px}
+.ova-carte{width:100%;max-width:440px;background:#fff;border-radius:24px;padding:32px 28px;box-shadow:0 1px 2px rgba(11,18,32,.04),0 12px 32px rgba(11,18,32,.06)}
+.ova-logo-mobile{display:inline-flex;margin-bottom:24px}
+.ova-carte h1{font-size:28px;font-weight:800;letter-spacing:-.6px;margin:0 0 6px}
+.ova-sous{margin:0 0 24px;color:#4B5563;font-size:15px}
+.ova-form{display:flex;flex-direction:column;gap:16px}
+.ova-form label,.ova-types legend{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#374151}
+.ova-form input{height:50px;border:1.5px solid #E5E7EB;border-radius:14px;padding:0 14px;font:inherit;font-size:15px;font-weight:500;color:#0B1220;background:#F9FAFB;outline:none;width:100%;box-sizing:border-box}
+.ova-form input:focus{border-color:#2563EB;background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.12)}
+.ova-pass{position:relative;display:block}
+.ova-pass input{padding-right:52px}
+.ova-pass button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;background:none;color:#6B7280;border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.ova-types{border:0;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ova-types legend{margin-bottom:6px}
+.ova-types button{height:44px;border-radius:12px;border:1.5px solid #E5E7EB;background:#fff;font:inherit;font-size:14px;font-weight:600;color:#374151;cursor:pointer}
+.ova-types button[aria-pressed="true"]{border-color:#2563EB;background:#EFF4FF;color:#1D4ED8}
+.ova-go{height:52px;border:0;border-radius:14px;background:#2563EB;color:#fff;font:inherit;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px}
+.ova-go:hover{background:#1D4ED8}.ova-go:disabled{opacity:.7;cursor:wait}
+.ova-err{margin:0;padding:10px 12px;border-radius:12px;background:#FEF2F2;color:#B91C1C;font-size:14px;font-weight:600}
+.ova-note{margin:0;font-size:13px;color:#6B7280;line-height:1.5}
+.ova-bas{font-size:15px;color:#374151}.ova-bas a{color:#2563EB;font-weight:700;text-decoration:none}
+.ova-legal{font-size:12px;color:#6B7280;text-align:center;max-width:440px;margin:0}.ova-legal a{color:#374151}
+@media (min-width:960px){
+  .ova{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .ova-pub{display:flex;flex-direction:column;justify-content:center;gap:28px;padding:56px 64px;background:#2563EB;color:#fff;position:relative;overflow:hidden}
+  .ova-pub::after{content:"";position:absolute;right:-120px;bottom:-120px;width:360px;height:360px;border-radius:50%;border:56px solid rgba(255,255,255,.08)}
+  .ova-pub-logo{display:inline-flex;align-items:center;gap:12px}.ova-pub-logo b{font-size:36px;font-weight:800;letter-spacing:-1.5px}
+  .ova-pub h2{font-size:44px;line-height:1.08;font-weight:800;letter-spacing:-1.5px;margin:0}
+  .ova-pub ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px;max-width:440px}
+  .ova-pub li{display:flex;gap:14px;align-items:flex-start}
+  .ova-pub li i{flex:none;width:10px;height:10px;border-radius:50%;background:#FF6A1A;margin-top:7px}
+  .ova-pub li span{display:flex;flex-direction:column;gap:2px;font-size:15px;color:rgba(255,255,255,.85)}
+  .ova-pub li strong{color:#fff;font-size:16px}
+  .ova-pub small{font-size:13px;color:rgba(255,255,255,.75)}
+  .ova-logo-mobile{display:none}
+}

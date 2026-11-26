@@ -1,5 +1,6 @@
 // Tâche planifiée (appelée toutes les 15 min par Supabase pg_cron) :
 // 1. autopilote : choisit la meilleure actu, la rédige et la planifie ; 2. publie les posts planifiés arrivés à échéance.
+import { parEspace } from "@/lib/plateforme";
 import { NextResponse } from "next/server";
 import { fetchVeille, fetchArticle, similar } from "@/lib/veille";
 import { generatePost, generateRecap, aiConfigured, sameStoryAs } from "@/lib/claude";
@@ -12,6 +13,7 @@ import { getSettings, filterUnseen, markSeen, savePost, emptyPost, duePosts, cou
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
+export const GET = (req: Request) => parEspace(req, tache);
 
 function authorized(req: Request) {
   const secret = process.env.CRON_SECRET;
@@ -21,7 +23,7 @@ function authorized(req: Request) {
   return header === `Bearer ${secret}` || key === secret;
 }
 
-export async function GET(req: Request) {
+async function tache(req: Request) {
   if (!authorized(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   const log: string[] = [];
   const q = new URL(req.url).searchParams;

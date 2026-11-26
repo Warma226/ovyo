@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { SESSION_COOKIE, createSession } from "@/lib/session";
 import { accepterInvitation, appareilDe, invitationValide, ouvrirSession } from "@/lib/equipe";
 import { ROLE_NOM } from "@/lib/roles";
+import { avecEspace } from "@/lib/espace";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +17,8 @@ export async function POST(req: Request) {
   try {
     const { t, password } = (await req.json().catch(() => ({}))) as { t?: string; password?: string };
     const m = await accepterInvitation(t ?? "", password ?? "");
-    const sid = await ouvrirSession(m.id, appareilDe(req.headers.get("user-agent") ?? ""));
-    const s = await createSession(m.id, m.role, sid);
+    const sid = await avecEspace(m.espace_id, () => ouvrirSession(m.id, appareilDe(req.headers.get("user-agent") ?? "")));
+    const s = await createSession(m.id, m.role, sid, m.espace_id);
     const res = NextResponse.json({ ok: true });
     res.cookies.set(SESSION_COOKIE, s.value, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: s.maxAge });
     return res;

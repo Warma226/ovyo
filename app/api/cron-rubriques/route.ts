@@ -1,11 +1,13 @@
 // Tâche planifiée (toutes les heures, Supabase pg_cron) : #CyberBase et #Citation du jour en automatique.
+import { parEspace } from "@/lib/plateforme";
 import { NextResponse } from "next/server";
 import { rubriquesAuto } from "@/lib/rubriques-auto";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
+export const GET = (req: Request) => parEspace(req, tache);
 
-export async function GET(req: Request) {
+async function tache(req: Request) {
   const secret = process.env.CRON_SECRET;
   const ok = secret && (req.headers.get("authorization") === `Bearer ${secret}` || new URL(req.url).searchParams.get("key") === secret);
   if (!ok) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
