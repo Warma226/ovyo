@@ -8,6 +8,8 @@
 //   sans photo, la citation est mise « à valider » et vous êtes prévenue sur Telegram.
 // Rien ne se crée quand l'autopilote est coupé (ou en mode crise).
 import { limiteEssai } from "./plateforme";
+import { autoOvyo } from "./auto-ovyo";
+import { marque } from "./marque";
 import { aiConfigured, aiJson, draftWithoutAI, generatePost } from "./claude";
 import { allSources, allTriggers, isOn, type Platform } from "./config";
 import { connectionStatus } from "./publish";
@@ -345,6 +347,9 @@ export async function rubriquesAuto(log: string[]) {
   if (!s.autopilot) return void log.push("Rubriques auto : autopilote coupé.");
   const essai = await limiteEssai();
   if (essai) return void log.push(`Rubriques auto : ${essai}.`);
+  // Clients Ovyo : leurs rubriques cochées au questionnaire (les rubriques historiques de TUVOA ne tournent pas).
+  const m = await marque();
+  if (!m.rubriques.includes("cyberbase")) return autoOvyo(log);
   for (const [nom, f] of [["CyberBase", () => cyberbaseDuJour(log)], ["Citation", () => citationsDuJour(log, 2)]] as const) {
     try { await f(); } catch (e) { log.push(`${nom} : ${(e as Error).message}`); }
   }
