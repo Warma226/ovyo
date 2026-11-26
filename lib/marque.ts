@@ -5,10 +5,11 @@ import { espaceCourant } from "./espace";
 import { lireEspace } from "./plateforme";
 import { crochetsIA } from "./claude";
 
-export type Profil = { description?: string; site?: string; pays?: string; ville?: string; mission?: string; ligne?: string; secteur?: string };
+export type Profil = { description?: string; site?: string; pays?: string; ville?: string; mission?: string; ligne?: string; secteur?: string; ton?: string; style?: string; police?: string; couleur2?: string; rubriques?: string[] };
 export type Marque = { nom: string; tag: string; site: string; pays: string; identite: string; mission: string; ligne: string; logo: string | null; couleur: string };
 
 const TYPES: Record<string, string> = { media: "média", entreprise: "entreprise", agence: "agence de communication", institution: "institution" };
+const TON: Record<string, string> = { formel: "formel, vouvoiement, phrases posées", chaleureux: "chaleureux, proche et simple", dynamique: "vif, accrocheur, une pointe d'humour" };
 const cache = new Map<string, { at: number; m: Marque }>();
 
 export const tagDe = (nom: string) => nom.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]/g, "") || "Ovyo";
@@ -16,7 +17,7 @@ export const tagDe = (nom: string) => nom.normalize("NFD").replace(/[̀-ͯ]/g, "
 export function construireMarque(e: { nom: string; type?: string | null; logo?: string | null; couleur?: string | null; profil?: Profil | null }): Marque {
   const p = e.profil ?? {};
   const lieu = [p.ville, p.pays].filter(Boolean).join(", ");
-  const identite = `${e.nom}, ${TYPES[e.type ?? "media"] ?? "organisation"}${lieu ? ` basé(e) à ${lieu}` : ""}${p.secteur ? `, secteur : ${p.secteur}` : ""}${p.description ? ` : ${p.description}` : ""}${p.site ? ` (site : ${p.site})` : ""}.`;
+  const identite = `${e.nom}, ${TYPES[e.type ?? "media"] ?? "organisation"}${lieu ? ` basé(e) à ${lieu}` : ""}${p.secteur ? `, secteur : ${p.secteur}` : ""}${p.description ? ` : ${p.description}` : ""}${p.site ? ` (site : ${p.site})` : ""}.${TON[p.ton ?? ""] ? ` Ton à adopter : ${TON[p.ton ?? ""]}.` : ""}`;
   return {
     nom: e.nom,
     tag: tagDe(e.nom),

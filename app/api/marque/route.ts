@@ -12,5 +12,6 @@ export async function GET() {
   return NextResponse.json({
     nom: m.nom, tag: m.tag, site: m.site, logo: m.logo, couleur: m.couleur,
     statut: e?.statut ?? null, essai_fin: e?.essai_fin ?? null,
+    configure: Boolean((e?.profil as { configure?: boolean } | null)?.configure),
   });
 }

@@ -25,7 +25,7 @@ export default function Inscription() {
       const res = await fetch("/api/inscription", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
       const d = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(d.error || `Inscription impossible (${res.status}).`);
-      window.location.href = "/?bienvenue=1";
+      window.location.href = "/bienvenue";
     } catch (err) {
       setError((err as Error).message); setBusy(false);
     }

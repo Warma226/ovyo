@@ -1193,3 +1193,48 @@ h1, h2, h3, .section-title, .topbar .title, .tv-h2, .tv-titre, .tv-studio-h2, .t
   .ova-pub small{font-size:13px;color:rgba(255,255,255,.75)}
   .ova-logo-mobile{display:none}
 }
+
+/* ─── Ovyo : questionnaire de bienvenue ─────────────────────────── */
+.obv{min-height:100dvh;background:#F4F6FA;color:#0B1220;font-family:var(--font-jakarta),system-ui,sans-serif;display:flex;flex-direction:column}
+.obv-attente{margin:auto;color:#4B5563;font-weight:600}
+.obv-tete{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px;background:#fff;border-bottom:1px solid #E5E7EB}
+.obv-etapes{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.obv-etapes li{padding:7px 12px;border-radius:999px;background:#F3F4F6;color:#6B7280;font-size:13px;font-weight:700}
+.obv-etapes li[data-fait]{background:#ECFDF5;color:#047857}
+.obv-etapes li[aria-current]{background:#2563EB;color:#fff}
+.obv-corps{flex:1;width:100%;max-width:760px;margin:0 auto;box-sizing:border-box;padding:28px 16px 120px}
+.obv-bloc{display:flex;flex-direction:column;gap:18px}
+.obv-bloc h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.6px}
+.obv-sous{margin:-8px 0 0;color:#4B5563}
+.obv-champ{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#374151}
+.obv-champ input,.obv-champ select,.obv-champ textarea{border:1.5px solid #E5E7EB;border-radius:14px;padding:12px 14px;font:inherit;font-size:15px;font-weight:500;background:#fff;color:#0B1220}
+.obv-champ input,.obv-champ select{height:50px;padding:0 14px}
+.obv-deux{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.obv-choix{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.obv-choix legend{font-size:13px;font-weight:700;color:#374151;margin-bottom:8px;padding:0}
+.obv-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.obv-grille button,.obv-styles button{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px;border-radius:16px;border:2px solid #E5E7EB;background:#fff;font:inherit;cursor:pointer;color:inherit}
+.obv-grille button span,.obv-styles button span:last-child{font-size:13px;color:#6B7280}
+.obv-grille button[aria-pressed="true"],.obv-styles button[aria-pressed="true"],.obv-polices button[aria-pressed="true"]{border-color:#2563EB;background:#EFF4FF}
+.obv-puces{display:flex;flex-wrap:wrap;gap:8px}
+.obv-puces button{height:42px;padding:0 16px;border-radius:999px;border:1.5px solid #E5E7EB;background:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:inherit}
+.obv-puces button[aria-pressed="true"]{background:#2563EB;border-color:#2563EB;color:#fff}
+.obv-couleurs{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.obv-couleurs button{width:40px;height:40px;border-radius:20px;border:3px solid #fff;box-shadow:0 0 0 1.5px #E5E7EB;cursor:pointer}
+.obv-couleurs button[aria-pressed="true"]{box-shadow:0 0 0 3px #0B1220}
+.obv-perso{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#374151;cursor:pointer}
+.obv-perso input{width:40px;height:40px;border:0;padding:0;background:none;cursor:pointer}
+.obv-polices{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.obv-polices button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px;border-radius:14px;border:2px solid #E5E7EB;background:#fff;cursor:pointer;color:#0B1220}
+.obv-polices small{font-family:var(--font-jakarta),sans-serif;font-size:12px;color:#6B7280}
+.obv-styles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.obv-styles button{gap:8px}
+.obv-rubriques{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.obv-rubriques label{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:14px;border:1.5px solid #E5E7EB;background:#fff;cursor:pointer}
+.obv-rubriques label[data-on]{border-color:#2563EB;background:#EFF4FF}
+.obv-rubriques input{width:20px;height:20px;margin-top:2px;flex:none}
+.obv-rubriques span{display:flex;flex-direction:column;gap:2px}
+.obv-rubriques small{font-size:12px;color:#6B7280}
+.obv-pied{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #E5E7EB}
+.obv-retour{height:48px;padding:0 18px;border-radius:14px;border:1.5px solid #E5E7EB;background:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.obv-suite{min-width:220px;margin:0}

@@ -70,13 +70,17 @@ export function BottomNav() {
   const marque = useMarque();
   const voit = (href: string) => !moi || lienVisible(moi.role, href);
   useEffect(() => {
-    if (path.startsWith("/acces") || path.startsWith("/invitation") || path.startsWith("/inscription")) return;
+    if (path.startsWith("/acces") || path.startsWith("/invitation") || path.startsWith("/inscription") || path.startsWith("/bienvenue")) return;
     fetch("/api/tableau?leger=1", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => d && !d.error && !d.demo && setEtat({ autopilot: Boolean(d.autopilot), grin: d.grin?.aTraiter ?? 0 }))
       .catch(() => {});
   }, [path]);
-  if (path.startsWith("/acces") || path.startsWith("/invitation") || path.startsWith("/inscription")) return null;
+  // Espace pas encore réglé : l'administrateur passe d'abord par le questionnaire de bienvenue.
+  useEffect(() => {
+    if (marque.configure === false && marque.statut && moi?.role === "admin" && !path.startsWith("/bienvenue")) window.location.replace("/bienvenue");
+  }, [marque.configure, marque.statut, moi?.role, path]);
+  if (path.startsWith("/acces") || path.startsWith("/invitation") || path.startsWith("/inscription") || path.startsWith("/bienvenue")) return null;
   const actif = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
   const secondaire = SECONDAIRES.some((p) => path.startsWith(p));
   const media = actif("/mediatheque");
