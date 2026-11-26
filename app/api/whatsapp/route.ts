@@ -19,9 +19,9 @@ export async function POST(req: Request) {
     if (r.ok) await activerCommandes();
   } else if (b.action === "commandes") {
     r = await activerCommandes();
-    if (r.ok) await whatsapp("🤖 TUVOA · Les commandes sont actives. Tapez / pour les voir : /brief, /prochains, /stats, /pause, /reprendre.");
+    if (r.ok) await whatsapp("🤖 Ovyo · Les commandes sont actives. Tapez / pour les voir : /brief, /prochains, /stats, /pause, /reprendre.");
   } else {
-    r = await whatsapp("✅ TUVOA · Les alertes sont actives. Vous recevrez ici le brief du soir et les problèmes de la plateforme.");
+    r = await whatsapp("✅ Ovyo · Les alertes sont actives. Vous recevrez ici le brief du soir et les problèmes de la plateforme.");
   }
   return NextResponse.json(r, { status: r.ok ? 200 : 400 });
 }

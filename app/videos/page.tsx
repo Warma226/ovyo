@@ -1,6 +1,7 @@
 "use client";
 // Vidéos à reprendre : les dernières vidéos tech des chaînes suivies (Micode, France 24…). VOA (Gemini) repère les
 // moments forts. La découpe 9:16 n'est ouverte que pour les vidéos CC BY ou les chaînes qui ont donné leur autorisation.
+import { marqueSync, useMarque } from "@/components/useMarque";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Trait } from "@/components/BottomNav";
@@ -232,7 +233,7 @@ export default function VideosPage() {
               <h2 className="tv-h2" style={{ fontSize: 17 }}>Ce que vous pouvez en faire</h2>
               <ol className="tv-vid-etapes">
                 <li><b>1</b><span><strong>Toutes les vidéos</strong> : écrire un post qui raconte et commente le moment, citer une phrase courte avec la source, partager le lien horodaté.</span></li>
-                <li><b>2</b><span><strong>Reel choc (1 min max)</strong> : directement depuis YouTube (Chrome sur ordinateur) ou depuis un fichier ; VOA coupe au bon minutage, recadre en vertical, met l&apos;accroche en bandeau orange, incruste les sous-titres, le logo TUVOA et le crédit de la chaîne.</span></li>
+                <li><b>2</b><span><strong>Reel choc (1 min max)</strong> : directement depuis YouTube (Chrome sur ordinateur) ou depuis un fichier ; VOA coupe au bon minutage, recadre en vertical, met l&apos;accroche en bandeau orange, incruste les sous-titres, le logo votre marque et le crédit de la chaîne.</span></li>
                 <li><b>3</b><span>Gardez des extraits courts et ajoutez votre commentaire dans le post : c&apos;est ce qui protège le mieux en cas de réclamation.</span></li>
               </ol>
             </section>
@@ -253,7 +254,7 @@ export default function VideosPage() {
 // Reel 9:16 fabriqué dans le navigateur, à partir de deux sources possibles :
 // - « YouTube » : la vidéo est lue dans un lecteur YouTube intégré et capturée à l'écran (Chrome sur ordinateur) ;
 // - « Fichier » : un fichier vidéo importé.
-// L'image est recadrée sur un canvas 1080 × 1920 avec accroche, sous-titres, logo TUVOA, crédit et barre de progression.
+// L'image est recadrée sur un canvas 1080 × 1920 avec accroche, sous-titres, nom de la marque, crédit et barre de progression.
 type Source = { img: CanvasImageSource; sx: number; sy: number; sw: number; sh: number };
 type CropTargetCtor = { fromElement(el: Element): Promise<unknown> };
 
@@ -350,7 +351,7 @@ function Decoupe({ videoId, extrait, credit, titre: titre0, fermer }: { videoId:
         ctx.fillStyle = "#fff"; ls.forEach((l, i) => ctx.fillText(l, W / 2, yb + 70 + i * 70));
       }
       ctx.fillStyle = "#2563EB"; ctx.beginPath(); ctx.roundRect(70, 90, 150, 150, 38); ctx.fill();
-      ctx.fillStyle = "#fff"; ctx.font = "800 38px Montserrat, sans-serif"; ctx.fillText("TUVOA", 145, 175);
+      ctx.fillStyle = "#fff"; ctx.font = "800 38px Montserrat, sans-serif"; ctx.fillText((marqueSync().nom || "").toUpperCase().slice(0, 14), 145, 175);
       ctx.fillStyle = "#CFDCFF"; ctx.font = "700 15px Montserrat, sans-serif"; ctx.fillText("TECH MEDIA", 145, 205);
       ctx.fillStyle = "#C9D6F2"; ctx.font = "600 30px Inter, sans-serif"; ctx.fillText(credit, W / 2, H - 120);
       ctx.fillStyle = "rgba(255,255,255,0.18)"; ctx.fillRect(0, H - 14, W, 14);
@@ -405,7 +406,7 @@ function Decoupe({ videoId, extrait, credit, titre: titre0, fermer }: { videoId:
       }
       // logo et crédit discrets
       ctx.fillStyle = "#2563EB"; ctx.beginPath(); ctx.roundRect(W - 190, 60, 130, 52, 14); ctx.fill();
-      ctx.fillStyle = "#fff"; ctx.font = "800 28px Montserrat, sans-serif"; ctx.textAlign = "center"; ctx.fillText("TUVOA", W - 125, 96);
+      ctx.fillStyle = "#fff"; ctx.font = "800 28px Montserrat, sans-serif"; ctx.textAlign = "center"; ctx.fillText((marqueSync().nom || "").toUpperCase().slice(0, 12), W - 125, 96);
       ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.font = "600 28px Inter, sans-serif"; ctx.fillText(credit, W / 2, H - 70);
       ctx.fillStyle = "rgba(255,255,255,0.2)"; ctx.fillRect(0, H - 12, W, 12);
       ctx.fillStyle = "#E94A06"; ctx.fillRect(0, H - 12, W * p, 12);
@@ -446,10 +447,10 @@ function Decoupe({ videoId, extrait, credit, titre: titre0, fermer }: { videoId:
           lignes(ctx, grp, W - 140, 2).forEach((l, i) => { const y = H - 360 + i * 92; ctx.strokeText(l, W / 2, y); ctx.fillStyle = "#FFD60A"; ctx.fillText(l, W / 2, y); });
         }
       }
-      // logo TUVOA discret, crédit, progression
+      // nom de la marque discret, crédit, progression
       ctx.textAlign = "center";
       ctx.fillStyle = "#2563EB"; ctx.fillRect(W - 220, 110, 150, 46);
-      ctx.fillStyle = "#fff"; ctx.font = "900 30px Montserrat, sans-serif"; ctx.fillText("TUVOA", W - 145, 144);
+      ctx.fillStyle = "#fff"; ctx.font = "900 30px Montserrat, sans-serif"; ctx.fillText((marqueSync().nom || "").toUpperCase().slice(0, 12), W - 145, 144);
       ctx.fillStyle = "rgba(255,255,255,0.9)"; ctx.font = "600 22px Inter, sans-serif"; ctx.fillText("TECH MEDIA", W - 145, 96);
       ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.font = "600 24px Inter, sans-serif"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 6; ctx.fillText(credit, W / 2, H - 60); ctx.shadowBlur = 0;
       ctx.fillStyle = "#E94A06"; ctx.fillRect(0, H - 8, W * p, 8);
@@ -652,7 +653,7 @@ function Decoupe({ videoId, extrait, credit, titre: titre0, fermer }: { videoId:
         {sortie ? (
           <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
             <video src={sortie.url} controls style={{ width: 140, borderRadius: 12, background: "#000" }} />
-            <a className="tv-btn-nuit" href={sortie.url} download={`TUVOA_reel.${sortie.ext}`}>TÉLÉCHARGER LE REEL</a>
+            <a className="tv-btn-nuit" href={sortie.url} download={`${marqueSync().tag || "Ovyo"}_reel.${sortie.ext}`}>TÉLÉCHARGER LE REEL</a>
           </div>
         ) : null}
         <button type="button" className="tv-btn-nuit" style={{ justifyContent: "center" }} onClick={creer} disabled={!pret || Boolean(msg) || fin <= debut}>{msg ? "ENREGISTREMENT EN COURS…" : "CRÉER LE REEL"}</button>

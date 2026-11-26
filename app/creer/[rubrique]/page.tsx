@@ -117,7 +117,7 @@ function AtelierRubrique({ rub }: { rub: RubriqueId }) {
       if (!citTexte.trim() || !auteur.trim() || !fonction.trim()) return "Indiquez la citation exacte, son auteur et sa fonction.";
       if (!srcNameFinal) return "Indiquez la source de la citation (média, discours, compte officiel).";
       if (pourPublier && !photo.trim()) return "Ajoutez la photo de l'auteur : sans elle, la citation ne part pas.";
-      if (pourPublier && !droitPhoto) return "Confirmez que TUVOA a le droit d'utiliser cette photo.";
+      if (pourPublier && !droitPhoto) return "Confirmez que vous avez le droit d'utiliser cette photo.";
     } else if (rub === "portrait") {
       if (!nom.trim() || !specialite.trim()) return "Indiquez le nom et la spécialité de l'expert.";
       if (pourPublier && !(accord.photo && accord.infos && accord.relecture)) return "Les trois accords de la personne sont obligatoires avant de planifier.";
@@ -285,7 +285,7 @@ function AtelierRubrique({ rub }: { rub: RubriqueId }) {
             <p className="tv-gris" style={{ fontSize: 13 }}>Partez d'une actu de la <Link href="/veille">veille</Link>, ou écrivez votre idée ci-dessous.</p>
           )}
           <label className="field">{sourceUrl ? "Votre angle (facultatif)" : "Votre idée"}
-            <textarea rows={3} value={idea} onChange={(e) => setIdea(e.target.value)} placeholder={sourceUrl ? "Ce que l'IA doit mettre en avant pour le public de TUVOA" : "Comment repérer une arnaque au mobile money"} />
+            <textarea rows={3} value={idea} onChange={(e) => setIdea(e.target.value)} placeholder={sourceUrl ? "Ce que l'IA doit mettre en avant pour votre public" : "Comment repérer une arnaque au mobile money"} />
           </label>
         </Carte>
         <Carte id="accroche" titre="2 · Choisissez l'accroche" extra={boutonIA("Rédiger avec l'IA")}>
@@ -341,10 +341,10 @@ function AtelierRubrique({ rub }: { rub: RubriqueId }) {
             <label className="field">Nom<input type="text" value={auteur} onChange={(e) => setAuteur(e.target.value)} placeholder="Prénom Nom" /></label>
             <label className="field">Fonction<input type="text" value={fonction} onChange={(e) => setFonction(e.target.value)} placeholder="Fonction, organisation" /></label>
           </div>
-          <ImageField label="Photo de l'auteur" hint="Une photo dont TUVOA a le droit d'usage. Le visuel se met à jour dans l'aperçu." value={photo} onChange={setPhoto} />
+          <ImageField label="Photo de l'auteur" hint="Une photo dont vous avez le droit d'usage. Le visuel se met à jour dans l'aperçu." value={photo} onChange={setPhoto} />
           <label className="tv-accord">
             <input type="checkbox" checked={droitPhoto} onChange={(e) => setDroitPhoto(e.target.checked)} />
-            <span><strong>TUVOA a le droit d'utiliser cette photo</strong><br /><span style={{ color: "#9A3412", fontSize: 13 }}>Fournie par la personne, son service de presse, ou libre de droits. Sans photo, la citation ne part pas.</span></span>
+            <span><strong>Nous avons le droit d'utiliser cette photo</strong><br /><span style={{ color: "#9A3412", fontSize: 13 }}>Fournie par la personne, son service de presse, ou libre de droits. Sans photo, la citation ne part pas.</span></span>
           </label>
         </Carte>
         <Carte id="diffusion" titre="3 · Diffusion" extra={boutonIA("Rédiger la légende")}>

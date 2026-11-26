@@ -83,7 +83,7 @@ function Compte() {
           <div style={{ flex: "1 1 340px", display: "flex", flexDirection: "column", gap: 6 }}>
             <Link href="/" className="tv-gris" style={{ textDecoration: "none", fontWeight: 600 }}>← Tableau de bord</Link>
             <h1 className="tv-titre">Mon compte</h1>
-            <span style={{ fontSize: 14, color: "#33425C" }}>{admin ? "Le compte principal de l'administration de TUVOA, et l'équipe qui travaille avec vous." : "Votre espace dans l'administration de TUVOA."}</span>
+            <span style={{ fontSize: 14, color: "#33425C" }}>{admin ? "Le compte principal de votre espace, et l'équipe qui travaille avec vous." : "Votre espace dans l'administration de votre espace."}</span>
           </div>
           <button type="button" className="btn" onClick={async () => { await fetch("/api/logout", { method: "POST" }).catch(() => {}); window.location.href = "/acces"; }}><Trait d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" size={16} />Se déconnecter</button>
         </div>
@@ -186,7 +186,7 @@ function VueMembre(p: Props) {
         </section>
         <section className="tv-voa" style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
           <Voa humeur="veille" taille={40} decor />
-          <span style={{ display: "flex", flexDirection: "column", gap: 6 }}><strong style={{ fontSize: 14, color: "#fff" }}>Vos publications sont signées</strong><span style={{ fontSize: 13, color: "#C9D6F2", lineHeight: 1.45 }}>Votre nom apparaît dans le calendrier et le journal de l&apos;administration. Les lecteurs, eux, ne voient que TUVOA.</span></span>
+          <span style={{ display: "flex", flexDirection: "column", gap: 6 }}><strong style={{ fontSize: 14, color: "#fff" }}>Vos publications sont signées</strong><span style={{ fontSize: 13, color: "#C9D6F2", lineHeight: 1.45 }}>Votre nom apparaît dans le calendrier et le journal de l&apos;administration. Les lecteurs, eux, ne voient que votre marque.</span></span>
         </section>
       </aside>
     </div>
@@ -250,7 +250,7 @@ function VueAdmin(p: Props) {
               <code>{lien.url}</code>
               <span className="row" style={{ gap: 8, flexWrap: "wrap" }}>
                 <button type="button" className="btn small" onClick={() => { void navigator.clipboard?.writeText(lien.url); setInfo("Lien copié."); }}>Copier</button>
-                <a className="btn small" href={`https://wa.me/?text=${encodeURIComponent(`Bienvenue dans l'équipe TUVOA ! Choisis ton mot de passe ici : ${lien.url}`)}`} target="_blank" rel="noopener noreferrer">Envoyer par WhatsApp</a>
+                <a className="btn small" href={`https://wa.me/?text=${encodeURIComponent(`Bienvenue dans l'équipe sur Ovyo ! Choisissez votre mot de passe ici : ${lien.url}`)}`} target="_blank" rel="noopener noreferrer">Envoyer par WhatsApp</a>
                 <span className="tv-gris" style={{ fontSize: 12 }}>Valable 7 jours, une seule fois.</span>
               </span>
             </div>
@@ -282,7 +282,7 @@ function VueAdmin(p: Props) {
               {lien && lien.pour === m.id ? (
                 <div className="tv-lien-invit" style={{ flexBasis: "100%" }}>
                   <code>{lien.url}</code>
-                  <span className="row" style={{ gap: 8 }}><button type="button" className="btn small" onClick={() => { void navigator.clipboard?.writeText(lien.url); setInfo("Lien copié."); }}>Copier</button><a className="btn small" href={`https://wa.me/?text=${encodeURIComponent(`Ton lien TUVOA pour choisir ton mot de passe : ${lien.url}`)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a></span>
+                  <span className="row" style={{ gap: 8 }}><button type="button" className="btn small" onClick={() => { void navigator.clipboard?.writeText(lien.url); setInfo("Lien copié."); }}>Copier</button><a className="btn small" href={`https://wa.me/?text=${encodeURIComponent(`Ton lien Ovyo pour choisir ton mot de passe : ${lien.url}`)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a></span>
                 </div>
               ) : null}
             </div>

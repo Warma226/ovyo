@@ -11,9 +11,9 @@ export async function POST() {
   if (!hook) return NextResponse.json({ error: "Ajoute d'abord LINKEDIN_WEBHOOK_URL dans Vercel." }, { status: 400 });
   const exemple = emptyPost({
     rubrique: "actu",
-    title: "Exemple TUVOA Studio",
-    texts: { facebook: "", linkedin: "Exemple de post envoyé par TUVOA Studio pour configurer Make.", tiktok: "", wp_title: "", wp_body: "" },
-    visual: { titre: "Exemple", texte: "Exemple de visuel TUVOA" },
+    title: "Exemple Ovyo",
+    texts: { facebook: "", linkedin: "Exemple de post envoyé par Ovyo pour configurer Make.", tiktok: "", wp_title: "", wp_body: "" },
+    visual: { titre: "Exemple", texte: "Exemple de visuel" },
   });
   const res = await fetch(hook, {
     method: "POST",

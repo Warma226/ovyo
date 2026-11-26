@@ -13,34 +13,19 @@ export type VisualData = {
   specialite?: string;
   photo?: string;
   source?: string;
+  marque?: string; // nom du client (espace Ovyo)
+  site?: string;
+  logo?: string; // logo du client (image déjà vérifiée)
 };
 
 const BLEU = "#2563EB";
 
-function Lambda({ size, color }: { size: number; color: string }) {
+// Logo du client : son image si elle existe, sinon son nom en lettres capitales.
+export function LogoMark({ size, color, marque, logo }: { size: number; color: string; dot?: string; marque?: string; logo?: string }) {
+  if (logo) return <img src={logo} alt="" height={size * 1.6} style={{ height: size * 1.6, objectFit: "contain" }} />;
+  const nom = (marque || "Ovyo").toUpperCase();
   return (
-    <svg width={size * 0.72} height={size * 0.74} viewBox="0 0 72 74">
-      <path d="M4 72 L36 4 L68 72" fill="none" stroke={color} strokeWidth={14} strokeLinejoin="miter" />
-    </svg>
-  );
-}
-
-export function LogoMark({ size, color, dot = BLEU }: { size: number; color: string; dot?: string }) {
-  const logoUrl = process.env.LOGO_URL;
-  if (logoUrl) {
-    return <img src={logoUrl} alt="" height={size * 1.6} style={{ height: size * 1.6, objectFit: "contain" }} />;
-  }
-  return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-      <div style={{ display: "flex", alignItems: "center", fontSize: size, fontWeight: 800, color, lineHeight: 1 }}>
-        <span>TUV</span>
-        <div style={{ width: size * 0.74, height: size * 0.74, borderRadius: size, background: dot, margin: `0 ${size * 0.04}px` }} />
-        <Lambda size={size} color={color} />
-      </div>
-      <div style={{ display: "flex", fontSize: size * 0.42, fontWeight: 300, color, letterSpacing: size * 0.05, marginTop: size * 0.08, paddingLeft: size * 0.5 }}>
-        TECH MEDIA
-      </div>
-    </div>
+    <div style={{ display: "flex", fontSize: nom.length > 14 ? size * 0.7 : size, fontWeight: 800, color, lineHeight: 1, letterSpacing: -size * 0.02 }}>{nom}</div>
   );
 }
 
@@ -54,7 +39,7 @@ function autoSize(text: string, steps: [number, number][]): number {
   return steps[steps.length - 1][1];
 }
 
-// Les gabarits sont dessinés pour du 4:5 (1080 × 1350, comme les maquettes TUVOA).
+// Les gabarits sont dessinés pour du 4:5 (1080 × 1350).
 // Pour les autres formats, le fond remplit tout et la composition 4:5 est centrée.
 type Stage = { s: number; ox: number; oy: number };
 function stage(w: number, h: number): Stage {
@@ -100,14 +85,14 @@ function cyberbase(d: VisualData, w: number, h: number) {
         </div>
       </div>
       <div style={at(st, 34, 1000, { width: 250 * s, height: 250 * s, alignItems: "center", justifyContent: "center", background: BLEU, borderRadius: `${120 * s}px ${30 * s}px ${110 * s}px ${30 * s}px` })}>
-        <LogoMark size={44 * s} color="#FFFFFF" dot="#FFFFFF" />
+        <LogoMark marque={d.marque} logo={d.logo} size={44 * s} color="#FFFFFF" dot="#FFFFFF" />
       </div>
-      <div style={at(st, 560, 1230, { width: 460 * s, justifyContent: "flex-end", fontSize: 50 * s, fontWeight: 800, color: BLEU })}>www.tuvoa.media</div>
+      <div style={at(st, 560, 1230, { width: 460 * s, justifyContent: "flex-end", fontSize: 50 * s, fontWeight: 800, color: BLEU })}>{d.site ?? ""}</div>
     </div>
   );
 }
 
-// Guillemets TUVOA : deux blocs géométriques à queue oblique (ouvrant = retourné).
+// Guillemets : deux blocs géométriques à queue oblique (ouvrant = retourné).
 function Guillemets({ width, color, ouvrant = false }: { width: number; color: string; ouvrant?: boolean }) {
   const d = ouvrant
     ? "M92 68H54V32L68 0H82L74 32H92Z M40 68H2V32L16 0H30L22 32H40Z"
@@ -144,7 +129,7 @@ function citation(d: VisualData, w: number, h: number) {
       {d.photo ? <img src={d.photo} alt="" width={w} height={h * 0.72} style={{ position: "absolute", left: 0, top: 0, width: w, height: h * 0.72, objectFit: "cover" }} /> : null}
       <div style={{ position: "absolute", left: 0, top: 0, width: w, height: h, display: "flex", backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.8) 44%, #000000 56%)" }} />
       <div style={at(st, 50, 50, { width: 100 * s, height: 100 * s, alignItems: "center", justifyContent: "center", background: BLEU })}>
-        <LogoMark size={20 * s} color="#FFFFFF" dot="#FFFFFF" />
+        <LogoMark marque={d.marque} logo={d.logo} size={20 * s} color="#FFFFFF" dot="#FFFFFF" />
       </div>
       <div style={at(st, 50, 480, { width: 980 * s, height: 690 * s, flexDirection: "column", justifyContent: "flex-end" })}>
         <div style={{ display: "flex", height: 82 * s, marginBottom: 26 * s }}>
@@ -188,13 +173,13 @@ function actu(d: VisualData, w: number, h: number) {
       {d.photo ? <img src={d.photo} alt="" width={w} height={h} style={{ position: "absolute", left: 0, top: 0, width: w, height: h, objectFit: "cover" }} /> : null}
       <div style={{ position: "absolute", left: 0, top: 0, width: w, height: h, display: "flex", backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 46%, rgba(0,0,0,0.82) 66%, #000000 84%)" }} />
       <div style={at(st, 838, 30, { width: 194 * s, height: 194 * s, alignItems: "center", justifyContent: "center", background: "#FFFFFF", borderRadius: `0 0 0 ${100 * s}px` })}>
-        <LogoMark size={42 * s} color="#333333" />
+        <LogoMark marque={d.marque} logo={d.logo} size={42 * s} color="#333333" />
       </div>
       <div style={at(st, 100, 793, { minWidth: 480 * s, height: 72 * s, alignItems: "center", padding: `0 ${40 * s}px 0 ${36 * s}px`, background: BLEU, fontSize: 42 * s, fontWeight: 800, color: "#FFFFFF" })}>
         {fit(categorie, 26)}
       </div>
       <div style={at(st, 102, 900, { width: 930 * s, fontSize: size * s, fontWeight: 800, color: "#FFFFFF", lineHeight: 1.3 })}>{info}</div>
-      <div style={at(st, 600, 1238, { width: 415 * s, justifyContent: "flex-end", fontSize: 46 * s, fontWeight: 800, color: "#FFFFFF" })}>www.tuvoa.media</div>
+      <div style={at(st, 600, 1238, { width: 415 * s, justifyContent: "flex-end", fontSize: 46 * s, fontWeight: 800, color: "#FFFFFF" })}>{d.site ?? ""}</div>
     </div>
   );
 }

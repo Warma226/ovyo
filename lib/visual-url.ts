@@ -13,6 +13,9 @@ export function visualUrl(post: Pick<Post, "rubrique" | "visual" | "source_name"
   if (post.visual.specialite) p.set("sp", post.visual.specialite);
   if (post.visual.photo) p.set("ph", post.visual.photo);
   if (post.source_name) p.set("src", post.source_name);
+  if (post.visual.marque) p.set("mq", post.visual.marque);
+  if (post.visual.site) p.set("w", post.visual.site);
+  if (post.visual.logo) p.set("lg", post.visual.logo);
   p.set("sig", signParams(p));
   return `${absolute ? appUrl() : ""}/api/visuel?${p.toString()}`;
 }

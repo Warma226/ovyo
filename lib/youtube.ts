@@ -185,7 +185,7 @@ export async function trierParIA(videos: VideoYT[]): Promise<Set<string>> {
     const lot = videos.slice(i, i + 40);
     try {
       const r = await aiJson<{ garder?: string[] }>(
-        `Tu es rédacteur en chef de TUVOA Tech Media, un média d'actualité tech francophone. Tu tries des vidéos YouTube avec rigueur : dans le doute, tu écartes.
+        `Tu es rédacteur en chef de {{IDENTITE}}. Tu tries des vidéos YouTube avec rigueur : dans le doute, tu écartes.
 GARDER seulement si les deux conditions sont vraies :
 1. La vidéo est en français.
 2. Son sujet principal est l'actualité de la tech et du numérique : IA, cybersécurité et arnaques en ligne, réseaux sociaux et plateformes, géants de la tech et leurs dirigeants, télécoms et mobile money, startups, spatial, data centers, crypto (sous l'angle technologique), lois et politique du numérique, sorties et annonces de produits tech, enquêtes, documentaires et interviews sur la tech. Pour un entretien avec une personnalité (hacker, entrepreneur du numérique, dirigeant tech, chercheur en IA…), garde-le si la tech, le numérique, la cybersécurité ou l'IA occupe une place centrale dans l'échange.
@@ -225,7 +225,7 @@ export async function reperer(id: string): Promise<Extrait[]> {
   const info = data?.info as VideoYT | undefined;
   if (!info) throw new Error("Vidéo inconnue.");
   const choc = info.genre !== "actu";
-  const consigne = `Tu es éditeur vidéo pour TUVOA Tech Media, un média tech francophone (Afrique de l'Ouest) qui publie des Reels, TikTok et carrousels.
+  const consigne = `Tu es éditeur vidéo pour {{IDENTITE}} qui publie des Reels, TikTok et carrousels.
 Vidéo : « ${info.titre} » (chaîne ${info.chaine}, ${info.genre === "docu" ? "documentaire" : info.genre === "interview" ? "interview" : "actualité"}).
 ${choc
   ? `Repère les 4 moments les plus CHOCS : une révélation, un aveu, un chiffre qui frappe, une prise de position tranchée, une phrase qu'on a envie de partager. Pour une interview, garde la parole de l'invité, pas les questions. `

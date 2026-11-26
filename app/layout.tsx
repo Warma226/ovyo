@@ -11,8 +11,8 @@ const jakarta = localFont({ src: "./fonts/plus-jakarta-sans.woff2", weight: "200
 const archivo = localFont({ src: "./fonts/archivo.woff", weight: "100 900", variable: "--font-archivo", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "TUVOA Studio",
-  description: "Veille, création et publication des posts de TUVOA Tech Media",
+  title: "Ovyo",
+  description: "Ovyo : veille, création, publication et gestion de communauté sur les réseaux sociaux",
   robots: { index: false, follow: false },
 };
 

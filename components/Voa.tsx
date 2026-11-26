@@ -1,4 +1,4 @@
-// VOA « Glitch », la mascotte de l'agent community manager : une boule bleue TUVOA à lunettes noires
+// VOA « Glitch », la mascotte de l'agent community manager : une boule bleue à lunettes noires
 // qui « bugue » quand elle s'énerve. Taquine, jamais méchante. Son humeur suit ce qui se passe sur la Page.
 export type Humeur = "veille" | "ecoute" | "parle" | "content" | "alerte" | "crise" | "dort" | "fete";
 

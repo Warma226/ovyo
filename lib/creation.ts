@@ -389,8 +389,8 @@ export const anim = (entree: Entree, delai: number, boucle: Boucle = "aucune", d
 export function logo(x = 56, y = 52, clair = true): El[] {
   return [
     nouveau.forme({ nom: "Logo (carré)", x, y, w: 58, h: 58, rayon: 0, fond: "#2563EB" }),
-    nouveau.texte({ nom: "Logo (sigle)", x, y: y + 20, w: 58, h: 20, texte: "TUVOA", police: 13, graisse: 800, align: "center" }),
-    nouveau.texte({ nom: "Logo (nom)", x: x + 72, y: y + 6, w: 240, h: 50, texte: "TUVOA", police: 40, graisse: 800, couleur: clair ? "#FFFFFF" : "#0A0A0A" }),
+    nouveau.texte({ nom: "Logo (sigle)", x, y: y + 20, w: 58, h: 20, texte: "MARQUE", police: 13, graisse: 800, align: "center" }),
+    nouveau.texte({ nom: "Logo (nom)", x: x + 72, y: y + 6, w: 240, h: 50, texte: "MARQUE", police: 40, graisse: 800, couleur: clair ? "#FFFFFF" : "#0A0A0A" }),
   ];
 }
 
@@ -447,11 +447,11 @@ export const MODELES: Modele[] = [
       nouveau.texte({ role: "titre", x: 40, y: 245, w: 1000, h: 110, texte: "NOUVELLE", police: 104, couleur: "#0A0A0A", align: "center", anim: anim("glisser-haut", 0.3) }),
       nouveau.texte({ role: "fort", x: 40, y: 345, w: 1000, h: 110, texte: "SEMAINE", police: 104, couleur: "#2563EB", align: "center", anim: anim("glisser-haut", 0.5) }),
       nouveau.pastille({ role: "pastille", x: 260, y: 470, w: 560, h: 84, texte: "Passionnés de tech.", anim: anim("pop", 0.8) }),
-      nouveau.texte({ role: "sous", x: 60, y: 575, w: 960, h: 44, texte: "Restez informés, vite et bien, avec TUVOA.", police: 32, graisse: 600, couleur: "#0A0A0A", align: "center", anim: anim("fondu", 1) }),
+      nouveau.texte({ role: "sous", x: 60, y: 575, w: 960, h: 44, texte: "Restez informés, vite et bien, avec nous.", police: 32, graisse: 600, couleur: "#0A0A0A", align: "center", anim: anim("fondu", 1) }),
       ...["IA", "Cybersécurité", "Mobile money", "Startups"].map((t, i) => nouveau.pastille({ role: `etiquette${i + 1}`, x: i < 2 ? 50 : 730, y: 680 + (i % 2) * 82, w: 300, h: 62, texte: t, police: 28, fond: ["#DCE6FF", "#2563EB", "#0A2A66", "#0A0A0A"][i], couleur: i === 0 ? "#0A2A66" : "#FFFFFF", ombre: "douce", anim: anim(i < 2 ? "glisser-droite" : "glisser-gauche", 1.2 + i * 0.12, "flotter") })),
       nouveau.forme({ nom: "Barre du bas", x: 0, y: 1150, w: 1080, h: 220, rayon: 44, fond: "#0A0A0A" }),
       nouveau.texte({ role: "barre", x: 60, y: 1225, w: 470, h: 50, texte: "Toute l'actu tech sur :", police: 34, graisse: 600, align: "right" }),
-      nouveau.pastille({ role: "bouton", x: 550, y: 1210, w: 470, h: 80, texte: "warmachinertech.com", police: 34, rayon: 40, anim: anim("aucune", 0, "pulser") }),
+      nouveau.pastille({ role: "bouton", x: 550, y: 1210, w: 470, h: 80, texte: "votresite.com", police: 34, rayon: 40, anim: anim("aucune", 0, "pulser") }),
     ])] }),
   },
   {
@@ -464,7 +464,7 @@ export const MODELES: Modele[] = [
         nouveau.icone({ x: 60, y: 830, icone: ic, w: 80, h: 80 }),
         nouveau.texte({ role: `categorie${n}`, x: 160, y: 845, w: 600, h: 50, texte: cat, police: 34, graisse: 700, couleur: "#6E9BFF", majuscules: true, espacement: 3 }),
         nouveau.texte({ role: `actu${n}`, x: 60, y: 940, w: 960, h: 260, texte: titre, police: 64, interligne: 1.08 }),
-        nouveau.texte({ nom: "Glisser", x: 60, y: 1250, w: 960, h: 40, texte: n < 4 ? "Glissez pour la suite →" : "Tout lire sur warmachinertech.com", police: 28, graisse: 600, couleur: "#BFD0FF" }),
+        nouveau.texte({ nom: "Glisser", x: 60, y: 1250, w: 960, h: 40, texte: n < 4 ? "Glissez pour la suite →" : "Tout lire sur votresite.com", police: 28, graisse: 600, couleur: "#BFD0FF" }),
       ]);
       return { format: "portrait", duree: 6, pages: [
         page("rad:#FFFFFF,#E4ECFF,#BFD0FF", [
@@ -490,7 +490,7 @@ export const MODELES: Modele[] = [
       nouveau.texte({ role: "surtitre", x: 70, y: 250, w: 940, h: 60, texte: "L'actu tech du jour", police: 44, graisse: 600, couleur: "#BFD0FF", anim: anim("fondu", 0.1) }),
       nouveau.texte({ role: "titre", x: 70, y: 320, w: 940, h: 220, texte: "Le titre qui arrête le pouce", police: 96, interligne: 1.02, anim: anim("glisser-haut", 0.3) }),
       nouveau.carte({ role: "carte1", x: 560, y: 1450, w: 440, h: 190, anim: anim("pop", 1.4, "flotter") }, { titre: "À retenir", etat: "Important", texte: "Une info clé en une phrase.", bouton: "Lire", icone: "ia" }),
-      nouveau.pastille({ role: "bouton", x: 290, y: 1720, w: 500, h: 90, texte: "Suivez TUVOA", police: 40, ombre: "neon", anim: anim("pop", 2, "pulser") }),
+      nouveau.pastille({ role: "bouton", x: 290, y: 1720, w: 500, h: 90, texte: "Suivez-nous", police: 40, ombre: "neon", anim: anim("pop", 2, "pulser") }),
     ])] }),
   },
   { id: "vierge", nom: "Page vierge", description: "Partir de zéro.", doc: () => ({ format: "portrait", duree: 6, pages: [page("#0B1633", [...logo()])] }) },

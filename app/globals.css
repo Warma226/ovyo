@@ -1040,7 +1040,7 @@ button.tv-etape-fixe:hover:not([aria-current="step"]) { background: rgba(10,42,1
 .tv-vid-capture iframe { width: min(100vw, calc(100vh * 16 / 9)); height: min(100vh, calc(100vw * 9 / 16)); border: 0; }
 .tv-vid-apercu { width: 135px; height: 240px; border-radius: 14px; background: #061A44; flex: 0 0 auto; box-shadow: 0 8px 20px rgba(6,26,68,0.25); }
 
-/* ═══ Thème v3 (validé le 26/11/2026, d'après la référence) : fond clair, cartes blanches arrondies, bleu TUVOA ═══ */
+/* ═══ Thème v3 (validé le 26/11/2026, d'après la référence) : fond clair, cartes blanches arrondies, bleu Ovyo ═══ */
 body { background: #f7f8fa; }
 h1, h2, h3, .section-title, .topbar .title { font-family: var(--font-inter), system-ui, sans-serif; letter-spacing: -0.02em; }
 h1 { font-weight: 800; }

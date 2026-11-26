@@ -16,8 +16,8 @@ import {
   type Episode, type Proposition, type Scene, type TypeScene,
 } from "@/lib/minute";
 
-const CLE_BROUILLON = "tuvoa-studio-brouillon";
-const CLE_LEGENDE = "tuvoa-studio-legende";
+const CLE_BROUILLON = "ovyo-studio-brouillon";
+const CLE_LEGENDE = "ovyo-studio-legende";
 const COULEUR: Record<TypeScene, string> = { accroche: "#0A0A0A", histoire: "#2563EB", message: "#22C55E", appel: "#16A34A", revelation: "#E94A06", technique: "#0A2A66", reflexes: "#6E9BFF", fin: "#94A3B8" };
 
 async function api<T>(body: Record<string, unknown>): Promise<T> {

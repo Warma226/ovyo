@@ -14,12 +14,12 @@ const LETTRE: Record<Platform, string> = { wordpress: "W", facebook: "F", linked
 // Les comptes se relient avec des variables d'environnement dans Vercel : « Connecter » affiche la marche à suivre.
 const HELP: Record<Platform, string[]> = {
   wordpress: [
-    "Dans WordPress : Utilisateurs › Profil › Mots de passe d'application, crée « TUVOA ».",
+    "Dans WordPress : Utilisateurs › Profil › Mots de passe d'application, crée « Ovyo ».",
     "Dans Vercel (Settings › Environment Variables) : WP_URL, WP_USER et WP_APP_PASSWORD.",
     "Redéploie l'app (Deployments › Redeploy).",
   ],
   facebook: [
-    "Crée une application sur developers.facebook.com et relie ta Page TUVOA.",
+    "Crée une application sur developers.facebook.com et relie votre Page.",
     "Obtiens un jeton de Page longue durée (pages_manage_posts, pages_read_engagement).",
     "Dans Vercel : FB_PAGE_ID et FB_PAGE_TOKEN, puis redéploie.",
   ],
@@ -27,14 +27,14 @@ const HELP: Record<Platform, string[]> = {
     "Sur make.com (gratuit), crée un scénario : module « Webhooks › Custom webhook », puis copie son adresse.",
     "Dans Vercel : LINKEDIN_WEBHOOK_URL = cette adresse, puis redéploie.",
     "Dans Make, sur le webhook : « Redetermine data structure », puis ici « Envoyer un exemple à Make ».",
-    "Ajoute « HTTP › Get a file » (URL : image_url) puis « LinkedIn › Create an Organization Image Post » (Page TUVOA, texte : text, image : le fichier). Active le scénario.",
+    "Ajoute « HTTP › Get a file » (URL : image_url) puis « LinkedIn › Create an Organization Image Post » (votre Page, texte : text, image : le fichier). Active le scénario.",
   ],
   tiktok: [
-    "Sur developers.tiktok.com, crée une application « TUVOA » et ajoute les produits « Login Kit » et « Content Posting API » (avec « Direct Post »).",
-    "Adresse de redirection (Login Kit) : https://tuvoa-app.vercel.app/api/tiktok/callback. Autorisations : user.info.basic et video.publish.",
-    "Vérifie l'adresse https://tuvoa-app.vercel.app/ comme préfixe d'URL (Content Posting API › URL properties) : envoie-moi le fichier de vérification, je le mets en ligne.",
+    "Sur developers.tiktok.com, crée une application « Ovyo » et ajoute les produits « Login Kit » et « Content Posting API » (avec « Direct Post »).",
+    "Adresse de redirection (Login Kit) : https://ovyo.warmachinertech.workers.dev/api/tiktok/callback. Autorisations : user.info.basic et video.publish.",
+    "Vérifie l'adresse https://ovyo.warmachinertech.workers.dev/ comme préfixe d'URL (Content Posting API › URL properties) : envoie-moi le fichier de vérification, je le mets en ligne.",
     "Dans Vercel : TIKTOK_CLIENT_KEY et TIKTOK_CLIENT_SECRET (onglet « Credentials » de l'app TikTok), puis redéploie.",
-    "Ouvre https://tuvoa-app.vercel.app/api/tiktok/login et autorise le compte TikTok de TUVOA.",
+    "Ouvre https://ovyo.warmachinertech.workers.dev/api/tiktok/login et autorise votre compte TikTok.",
     "Tant que TikTok n'a pas validé l'app (audit), les publications sont visibles par toi seul. Demande l'audit dans le portail pour publier en public.",
   ],
 };
@@ -220,7 +220,7 @@ export default function Connexions() {
           <div style={{ flex: "1 1 340px", display: "flex", flexDirection: "column", gap: 6 }}>
             <Link href="/" className="tv-gris tv-desk" style={{ textDecoration: "none", fontWeight: 600 }}>← Tableau de bord</Link>
             <h1 className="tv-titre">Connexions</h1>
-            <span style={{ fontSize: 14, color: "#33425C" }}>L'état de chaque compte et service dont TUVOA a besoin pour publier.</span>
+            <span style={{ fontSize: 14, color: "#33425C" }}>L'état de chaque compte et service dont Ovyo a besoin pour publier.</span>
           </div>
           <span className="tv-rond" style={{ width: "auto", height: 52, padding: "0 16px", borderRadius: 16, gap: 8, fontSize: 14, cursor: "default" }}>
             <strong style={{ fontFamily: "var(--font-mont)", fontSize: 20 }}>{info ? `${okCount} / ${total}` : "…"}</strong>
@@ -240,7 +240,7 @@ export default function Connexions() {
           </div>
         ) : null}
 
-        <div className="row" style={{ alignItems: "baseline", gap: 10 }}><h2 className="tv-h2" style={{ fontSize: 22 }}>Canaux de publication</h2><span className="tv-gris">là où TUVOA publie</span></div>
+        <div className="row" style={{ alignItems: "baseline", gap: 10 }}><h2 className="tv-h2" style={{ fontSize: 22 }}>Canaux de publication</h2><span className="tv-gris">là où Ovyo publie pour vous</span></div>
         <div className="tv-cnx-grille">
           {PLATFORMS.map((p) => {
             const c = info?.connections[p.id];
@@ -250,7 +250,7 @@ export default function Connexions() {
                 key={p.id}
                 ini={LETTRE[p.id]}
                 couleur={COULEUR[p.id]}
-                nom={p.id === "wordpress" ? "Site tuvoa.media" : p.label}
+                nom={p.id === "wordpress" ? "Site web" : p.label}
                 role={ROLE[p.id]}
                 etat={info ? etatCanal(p.id) : "off"}
                 extra={p.id === "facebook" && jetonJours !== null ? (
@@ -304,7 +304,7 @@ export default function Connexions() {
               <Puce ok={null}>Alertes : chaque commentaire Facebook, publication en échec, post viral, mode crise, bilan du lundi</Puce>
               <Puce ok={null}>Un même problème n'est signalé qu'une fois toutes les 6 heures</Puce>
               {waMsg ? <Puce ok={!waMsg.startsWith("Échec")}>{waMsg}</Puce> : null}
-              {aide("alertes", ["Dans Telegram, ouvrez @BotFather, envoyez /newbot, choisissez un nom (ex. TUVOA Alertes) et un identifiant finissant par « bot ». BotFather vous donne un jeton.", "Dans Vercel, ajoutez TELEGRAM_BOT_TOKEN avec ce jeton, puis redéployez. Ouvrez ensuite votre bot, appuyez sur « Démarrer », et cliquez ici sur « Relier mon Telegram »."])}
+              {aide("alertes", ["Dans Telegram, ouvrez @BotFather, envoyez /newbot, choisissez un nom (ex. Ovyo Alertes) et un identifiant finissant par « bot ». BotFather vous donne un jeton.", "Dans Vercel, ajoutez TELEGRAM_BOT_TOKEN avec ce jeton, puis redéployez. Ouvrez ensuite votre bot, appuyez sur « Démarrer », et cliquez ici sur « Relier mon Telegram »."])}
             </Carte>
             <Carte ini="IA" couleur="linear-gradient(145deg, #C4B5FD, #7C3AED)" nom="Rédaction par l'IA" role={info?.aiProvider === "claude" ? "Claude" : "Google Gemini · gratuit"} etat={!info ? "off" : info.ai ? "ok" : "off"}
               actions={!info?.ai ? btnAide("ia", false) : undefined}>

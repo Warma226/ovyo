@@ -3,6 +3,7 @@ import { SESSION_COOKIE, createSession } from "@/lib/session";
 import { accepterInvitation, appareilDe, invitationValide, ouvrirSession } from "@/lib/equipe";
 import { ROLE_NOM } from "@/lib/roles";
 import { avecEspace } from "@/lib/espace";
+import { lireEspace } from "@/lib/plateforme";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const m = await invitationValide(new URL(req.url).searchParams.get("t") ?? "").catch(() => null);
   if (!m) return NextResponse.json({ error: "Ce lien d'invitation n'est plus valable. Demandez-en un nouveau à l'administration." }, { status: 404 });
-  return NextResponse.json({ nom: m.nom, contact: m.contact, role: m.role, roleNom: ROLE_NOM[m.role], expire: m.invitation_expire });
+  const e = await lireEspace(m.espace_id).catch(() => null);
+  return NextResponse.json({ nom: m.nom, contact: m.contact, role: m.role, roleNom: ROLE_NOM[m.role], expire: m.invitation_expire, espace: e?.nom ?? "" });
 }
 
 export async function POST(req: Request) {

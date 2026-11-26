@@ -2,6 +2,8 @@
 // Navigation principale : barre d'onglets flottante sur téléphone, menu latéral bleu nuit sur ordinateur (≥ 1024 px).
 // Rendue une seule fois dans le layout. Sur téléphone, elle est masquée sur les écrans secondaires
 // (création, éditeur, aperçu…) qui ont leur propre barre d'actions ; sur ordinateur elle reste toujours visible.
+import { OvyoSymbole } from "./OvyoLogo";
+import { useMarque } from "./useMarque";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -33,16 +35,9 @@ export function Trait({ d, size = 22, stroke = 1.8 }: { d: string; size?: number
   );
 }
 
-// Tuile logo TUVOA (carré bleu, point orange)
-export function LogoTuile({ taille = 76, bord = "#0A2A66" }: { taille?: number; bord?: string }) {
-  const k = taille / 76;
-  return (
-    <span className="tv-logo" style={{ width: taille, height: taille, borderRadius: 20 * k }} role="img" aria-label="TUVOA Tech Media">
-      <span style={{ fontSize: 19 * k }}>TUVOA</span>
-      <span style={{ fontSize: 7.5 * k, letterSpacing: 1.6 * k }}>TECH MEDIA</span>
-      <i style={{ width: 14 * k, height: 14 * k, borderWidth: Math.max(2, 3 * k), borderColor: bord, right: -4 * k, top: -4 * k }} />
-    </span>
-  );
+// Tuile logo Ovyo (carré bleu, deux anneaux, point orange)
+export function LogoTuile({ taille = 76 }: { taille?: number; bord?: string }) {
+  return <OvyoSymbole taille={taille} />;
 }
 
 const MENU: { href: string; label: string; d: string; badge?: "grin" }[] = [
@@ -72,15 +67,16 @@ export function BottomNav() {
   const path = usePathname();
   const [etat, setEtat] = useState<Etat>(null);
   const moi = useMoi();
+  const marque = useMarque();
   const voit = (href: string) => !moi || lienVisible(moi.role, href);
   useEffect(() => {
-    if (path.startsWith("/acces") || path.startsWith("/invitation")) return;
+    if (path.startsWith("/acces") || path.startsWith("/invitation") || path.startsWith("/inscription")) return;
     fetch("/api/tableau?leger=1", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => d && !d.error && !d.demo && setEtat({ autopilot: Boolean(d.autopilot), grin: d.grin?.aTraiter ?? 0 }))
       .catch(() => {});
   }, [path]);
-  if (path.startsWith("/acces") || path.startsWith("/invitation")) return null;
+  if (path.startsWith("/acces") || path.startsWith("/invitation") || path.startsWith("/inscription")) return null;
   const actif = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
   const secondaire = SECONDAIRES.some((p) => path.startsWith(p));
   const media = actif("/mediatheque");
@@ -88,9 +84,9 @@ export function BottomNav() {
   return (
     <>
       <nav className="tv-side" aria-label="Navigation principale">
-        <Link href="/" className="tv-side-brand" aria-label="TUVOA Studio, tableau de bord">
-          <LogoTuile taille={42} bord="#FFFFFF" />
-          <span className="tv-side-studio">TUVOA Studio</span>
+        <Link href="/" className="tv-side-brand" aria-label="Ovyo, tableau de bord">
+          <LogoTuile taille={42} />
+          <span className="tv-side-studio" style={{ display: "flex", flexDirection: "column", lineHeight: 1.15, minWidth: 0 }}><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{marque.nom || "Ovyo"}</span><small style={{ fontSize: 11, fontWeight: 600, opacity: 0.6 }}>avec Ovyo</small></span>
         </Link>
         <div className="tv-side-items">
           {MENU.filter((it) => voit(it.href)).map((it) => (

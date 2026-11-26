@@ -20,7 +20,7 @@ async function ecrire(e: Etat) {
   if (error) throw new Error(`Enregistrement impossible : ${error.message}`);
 }
 
-const CADRE = `Tu es le scénariste de « La minute cyber », la série vidéo de TUVOA Tech Media (média tech burkinabè et africain).
+const CADRE = `Tu es le scénariste de « La minute cyber », la série vidéo de {{IDENTITE}}
 Chaque épisode dure 60 secondes maximum, au format vertical. But : sensibiliser contre la cybercriminalité réelle.
 Règle d'or : on raconte d'abord une HISTOIRE réaliste et prenante (une victime ordinaire en Afrique de l'Ouest : Ouagadougou, Bobo-Dioulasso, Abidjan…, avec mobile money, WhatsApp, Facebook, appels, SMS), avec du suspense ;
 la technique d'attaque n'est nommée et expliquée qu'à la FIN (révélation), puis viennent 3 réflexes concrets.
@@ -68,7 +68,7 @@ Structure, 7 à 9 scènes, voix off totale de 130 à 150 mots (60 s maximum) :
 8. "reflexes" : les 3 bons réflexes dans "points" (8 mots max chacun).
 9. "fin" : appel à partager pour protéger ses proches.
 Pour chaque scène : "type", "voix" (texte lu), "ecran" (texte à l'écran, 10 mots max, différent de la voix, percutant), "plan" (storyboard : ce qu'on voit, cadrage, ambiance sonore, 1 à 2 phrases).
-Aussi : "titre" (6 mots max), "menace" (nom de la technique), "technique" {"nom": 1 à 3 mots, "explication": 2 phrases}, "reflexes" (les 3 réflexes), "legende" (texte du post Facebook : 2 à 4 phrases qui donnent envie de regarder sans dévoiler la chute, puis les 3 réflexes en liste, finir par #LaMinuteCyber #TUVOA et 1 ou 2 hashtags).
+Aussi : "titre" (6 mots max), "menace" (nom de la technique), "technique" {"nom": 1 à 3 mots, "explication": 2 phrases}, "reflexes" (les 3 réflexes), "legende" (texte du post Facebook : 2 à 4 phrases qui donnent envie de regarder sans dévoiler la chute, puis les 3 réflexes en liste, finir par #LaMinuteCyber #{{MARQUE}} et 1 ou 2 hashtags).
 Réponds uniquement en JSON : {"titre","menace","scenes":[{"type","voix","ecran","plan","detail?","points?"}],"technique":{"nom","explication"},"reflexes":[],"legende"}`, 5000);
       const scenes = nettoyerScenes(r.scenes ?? []);
       if (scenes.length < 3) throw new Error("Le script reçu est incomplet, réessaie.");

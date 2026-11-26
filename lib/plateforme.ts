@@ -7,6 +7,7 @@ export type Espace = {
   id: string; nom: string; slug: string; logo: string | null; couleur: string | null;
   formule: string; statut: "essai" | "actif" | "suspendu" | "resilie";
   essai_fin: string | null; abonnement_fin: string | null; created_at: string;
+  type?: string; profil?: Record<string, string> | null; proprietaire?: string | null;
 };
 export const ESSAI_JOURS = 7;
 export const ESSAI_MAX_POSTS = 15; // publications automatiques possibles pendant l'essai (quota d'IA partagé)

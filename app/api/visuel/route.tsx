@@ -9,7 +9,7 @@ import { renderSlide, type SlideData } from "@/lib/recap-slides";
 async function safeImage(url: string | null): Promise<string | undefined> {
   if (!url || !/^https?:\/\//.test(url)) return undefined;
   try {
-    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; TUVOA/1.0)" }, signal: AbortSignal.timeout(6000) });
+    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; Ovyo/1.0)" }, signal: AbortSignal.timeout(6000) });
     if (!res.ok) return undefined;
     const type = (res.headers.get("content-type") ?? "").split(";")[0].trim();
     const buf = Buffer.from(await res.arrayBuffer());
@@ -54,6 +54,7 @@ async function recap(params: URLSearchParams) {
   } else {
     data = { kind: "end", assets: appUrl() };
   }
+  data = { ...data, marque: params.get("mq") ?? undefined, site: params.get("w") ?? undefined };
   const fonts = [...(await montserratFonts()), ...(await serifItalicFonts()), ...(await archivoFonts())];
   return new ImageResponse(renderSlide(data), {
     width: 1080,
@@ -83,7 +84,10 @@ export async function GET(req: Request) {
     specialite: params.get("sp") ?? undefined,
     photo: params.get("ph") ?? undefined,
     source: params.get("src") ?? undefined,
+    marque: params.get("mq") ?? undefined,
+    site: params.get("w") ?? undefined,
   };
+  data.logo = await safeImage(params.get("lg"));
   // Citation : photo chargée ici (formats non pris en charge → visuel sans photo), police Montserrat.
   if (data.rubrique === "citation") data.photo = await safeImage(data.photo ?? null);
   const { w, h } = FORMATS[format];

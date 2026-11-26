@@ -24,7 +24,7 @@ function ilYa(iso: string | null, now: number): string {
 }
 
 // Étiquette principale d'une actu.
-// Déjà reprise par TUVOA : état de la publication.
+// Déjà reprise dans une publication : état de la publication.
 const REPRISE: Record<string, [string, string]> = {
   publie: ["Déjà publiée", "vert"], planifie: ["Déjà planifiée", "bleu"], a_valider: ["Planifiée · à valider", "bleu"],
   brouillon: ["En brouillon", ""], erreur: ["Publication en erreur", "rouge"],
@@ -134,7 +134,7 @@ export default function Veille() {
       ? "Rien de marquant pour l'instant. Je relance la collecte dès que vous le voulez."
       : sujet.sameStoryCount > 1
         ? `${sujet.sameStoryCount} sources parlent de ce sujet : c'est le sujet du jour. Je vous prépare le post ?`
-        : `« ${sujet.title.slice(0, 70)}${sujet.title.length > 70 ? "…" : ""} » est le plus pertinent pour TUVOA. Je vous prépare le post ?`;
+        : `« ${sujet.title.slice(0, 70)}${sujet.title.length > 70 ? "…" : ""} » est le plus pertinent pour vous. Je vous prépare le post ?`;
   const maxSrc = Math.max(1, ...(compte?.sources ?? []).map((s) => s.n));
 
   return (
@@ -214,7 +214,7 @@ export default function Veille() {
             {/* Flux */}
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
               <h2 className="tv-h2" style={{ fontSize: 22 }}>Le flux</h2>
-              <span className="tv-gris">trié par pertinence pour TUVOA</span>
+              <span className="tv-gris">trié par pertinence pour vous</span>
             </div>
             {items === null ? <p className="tv-gris">Lecture des sources…</p> : null}
             {items && flux.length === 0 ? <p className="tv-gris">{recherche ? "Aucune actu ne correspond à cette recherche." : "Rien d'autre pour ce thème pour l'instant."}</p> : null}
@@ -245,7 +245,7 @@ export default function Veille() {
                     {it.post ? (
                       <div className="tv-reprise" data-statut={it.post.status}>
                         <span className={`tv-pill ${REPRISE[it.post.status]?.[1] ?? ""}`}>{REPRISE[it.post.status]?.[0] ?? "Déjà reprise"}</span>
-                        <span>{it.post.status === "publie" ? `Publiée ${datePost(it.post.at)}` : it.post.at && it.post.status !== "brouillon" ? `Prévue ${datePost(it.post.at)}` : "Une publication TUVOA reprend déjà cette info."}</span>
+                        <span>{it.post.status === "publie" ? `Publiée ${datePost(it.post.at)}` : it.post.at && it.post.status !== "brouillon" ? `Prévue ${datePost(it.post.at)}` : "Une publication votre marque reprend déjà cette info."}</span>
                       </div>
                     ) : null}
                     <div className="tv-actions">

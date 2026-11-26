@@ -31,7 +31,7 @@ export async function relierTelegram(): Promise<{ ok: boolean; detail: string }>
   const chat = String(maj.message.chat.id);
   const { data } = await db().from("settings").select("data").eq("id", 9).maybeSingle();
   await db().from("settings").upsert({ id: 9, data: { ...((data?.data as object) ?? {}), telegramChat: chat } });
-  const t = await tg("sendMessage", { chat_id: chat, text: `✅ TUVOA · Bonjour ${maj.message.chat.first_name ?? ""} ! Vous recevrez ici le brief du soir et les problèmes de la plateforme.` });
+  const t = await tg("sendMessage", { chat_id: chat, text: `✅ Ovyo · Bonjour ${maj.message.chat.first_name ?? ""} ! Vous recevrez ici le brief du soir et les problèmes de la plateforme.` });
   return t.ok ? { ok: true, detail: "Telegram relié : un message de bienvenue vient de partir." } : { ok: false, detail: `Telegram : ${t.description}` };
 }
 
@@ -90,7 +90,7 @@ export async function whatsapp(texte: string): Promise<{ ok: boolean; detail: st
 
 // Alerte « problème » : un même problème (même clé) n'est renvoyé qu'après `delaiH` heures, pour ne pas inonder la messagerie.
 export async function alerte(cle: string, texte: string, delaiH = 6) {
-  return envoiUnique(cle, `⚠️ TUVOA · ${texte}`, delaiH);
+  return envoiUnique(cle, `⚠️ Ovyo · ${texte}`, delaiH);
 }
 
 // Envoi « une seule fois » par clé et par période (rapport du lundi, post viral, commentaire négatif…).

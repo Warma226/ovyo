@@ -29,6 +29,7 @@ export type Post = {
   visual: {
     titre: string; texte: string; nom?: string; specialite?: string; photo?: string; image?: string; slides?: string[]; video?: string;
     // WordPress : légende et texte alternatif de l'image à la une, catégories, étiquettes, adresse, images supplémentaires
+    marque?: string; site?: string; logo?: string;
     legende?: string; alt?: string; image_secours?: string; wp_categories?: string[]; wp_tags?: string[]; wp_slug?: string; wp_maj?: "categories";
     wp_images?: { url: string; legende: string; alt?: string }[];
   };
@@ -45,6 +46,16 @@ export type Post = {
 export { DEFAULT_SETTINGS, mergeSettings, type Settings } from "./settings";
 import { DEFAULT_SETTINGS, mergeSettings, type Settings } from "./settings";
 import { espaceCourant } from "./espace";
+import { marque, appliquer } from "./marque";
+
+// Remplace les repères {{MARQUE}}, {{TAG}}… par l'identité du client, et note sa marque sur le visuel.
+async function marquerPost(post: Post): Promise<Post> {
+  if (!espaceCourant()) return post;
+  const m = await marque();
+  const texts = Object.fromEntries(Object.entries(post.texts ?? {}).map(([k, v]) => [k, typeof v === "string" ? appliquer(v, m) : v])) as Post["texts"];
+  const visual = { ...post.visual, marque: m.nom, site: m.site || undefined, logo: m.logo || undefined };
+  return { ...post, texts, visual };
+}
 
 let client: SupabaseClient | null = null;
 export function isDemo() {
@@ -86,9 +97,9 @@ export function db(espace?: string): SupabaseClient {
 
 type Mem = { posts: Post[]; settings: Settings; seen: Set<string> };
 function mem(): Mem {
-  const g = globalThis as unknown as { __tuvoa?: Mem };
-  if (!g.__tuvoa) g.__tuvoa = { posts: [], settings: structuredClone(DEFAULT_SETTINGS), seen: new Set() };
-  return g.__tuvoa;
+  const g = globalThis as unknown as { __ovyo?: Mem };
+  if (!g.__ovyo) g.__ovyo = { posts: [], settings: structuredClone(DEFAULT_SETTINGS), seen: new Set() };
+  return g.__ovyo;
 }
 
 export function newId() {
@@ -144,6 +155,7 @@ export async function getPost(id: string): Promise<Post | null> {
 }
 
 export async function savePost(post: Post): Promise<Post> {
+  post = await marquerPost(post);
   if (isDemo()) {
     const m = mem();
     const i = m.posts.findIndex((p) => p.id === post.id);
@@ -208,7 +220,7 @@ export async function postedUrls(urls: string[]): Promise<Set<string>> {
   return new Set((data ?? []).map((r: { source_url: string | null }) => r.source_url ?? ""));
 }
 
-// Publications TUVOA qui reprennent ces articles (adresse comparée sans paramètres ni « / » final).
+// Publications de l'espace qui reprennent ces articles (adresse comparée sans paramètres ni « / » final).
 export const urlNette = (u: string) => u.trim().replace(/[?#].*$/, "").replace(/\/+$/, "").replace(/^http:/, "https:").toLowerCase();
 export async function postsParUrl(urls: string[]): Promise<Map<string, { id: string; status: string; at: string | null }>> {
   const out = new Map<string, { id: string; status: string; at: string | null }>();

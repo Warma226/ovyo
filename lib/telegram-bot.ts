@@ -1,11 +1,11 @@
-// Bot Telegram de TUVOA : commandes (/brief, /prochains, /pause, /reprendre, /stats) et alertes supplémentaires
+// Bot Telegram d'Ovyo : commandes (/brief, /prochains, /pause, /reprendre, /stats) et alertes supplémentaires
 // (post viral, commentaires négatifs du Grin, rapport du lundi). Seule la discussion reliée peut piloter l'app.
 import { createHash } from "crypto";
 import { db, getSettings, saveSettings } from "./store";
 import { graph, PAGE, fbConfigure } from "./cm";
 import { chatTelegram, envoiUnique, tg } from "./whatsapp";
 
-const APP = () => (process.env.APP_URL || "https://tuvoa-app.vercel.app").replace(/\/+$/, "");
+const APP = () => (process.env.APP_URL || "https://ovyo.warmachinertech.workers.dev").replace(/\/+$/, "");
 export const secretWebhook = () => createHash("sha256").update(`tuvoa-tg:${process.env.TELEGRAM_BOT_TOKEN ?? ""}`).digest("hex").slice(0, 48);
 
 const COMMANDES = [
@@ -113,7 +113,7 @@ async function pilote(marche: boolean): Promise<string> {
 }
 
 const AIDE = [
-  "🤖 Commandes TUVOA",
+  "🤖 Commandes Ovyo",
   "",
   "/brief : le point de la journée",
   "/prochains : les 5 prochains posts",
@@ -128,7 +128,7 @@ export async function traiterMessage(update: { message?: { chat: { id: number };
   if (!m?.text) return;
   const chat = await chatTelegram();
   if (!chat || String(m.chat.id) !== chat) {
-    await tg("sendMessage", { chat_id: m.chat.id, text: "Ce bot est réservé à l'administration de TUVOA." });
+    await tg("sendMessage", { chat_id: m.chat.id, text: "Ce bot est réservé à l'administration de cet espace Ovyo." });
     return;
   }
   const cmd = m.text.trim().split(/[\s@]/)[0].toLowerCase();
@@ -163,7 +163,7 @@ export async function verifierViral(log: string[]) {
     if (s < Math.max(20, 3 * mediane)) continue;
     const r = p.reactions?.summary.total_count ?? 0, c = p.comments?.summary.total_count ?? 0, sh = p.shares?.count ?? 0;
     await envoiUnique(`viral:${p.id}`, [
-      "🔥 TUVOA · Un post décolle !",
+      "🔥 Ovyo · Un post décolle !",
       "",
       `« ${(p.message ?? "").split("\n")[0].slice(0, 120)} »`,
       `${r} réactions · ${c} commentaires · ${sh} partages (${Math.round(s / Math.max(1, mediane))}× plus que d'habitude)`,
@@ -183,7 +183,7 @@ export async function verifierGrin() {
     .in("canal", ["commentaire", "message", "mention"]).gte("created_at", new Date(Date.now() - 45 * 60000).toISOString()).order("created_at", { ascending: true }).limit(15);
   for (const l of (data ?? []) as { id: string; canal: string; auteur: string | null; texte: string | null; lien: string | null; action: string; reponse: string | null; ton: string | null; traite: boolean }[]) {
     const negatif = l.ton === "negatif" && !l.traite;
-    const quoi = l.canal === "message" ? "Message privé" : l.canal === "mention" ? "Mention de TUVOA" : "Nouveau commentaire";
+    const quoi = l.canal === "message" ? "Message privé" : l.canal === "mention" ? "Mention de la Page" : "Nouveau commentaire";
     await envoiUnique(`com:${l.id}`, [
       `${negatif ? "😠" : "💬"} ${quoi}${negatif ? " (négatif, à regarder)" : ""}`,
       "",
@@ -199,5 +199,5 @@ export async function verifierGrin() {
 export async function rapportLundi() {
   const now = new Date();
   if (now.getUTCDay() !== 1 || now.getUTCHours() < 7) return;
-  await envoiUnique(`lundi:${now.toISOString().slice(0, 10)}`, await stats("🗓️ TUVOA · Le bilan de la semaine"), 24 * 6);
+  await envoiUnique(`lundi:${now.toISOString().slice(0, 10)}`, await stats("🗓️ Ovyo · Le bilan de la semaine"), 24 * 6);
 }

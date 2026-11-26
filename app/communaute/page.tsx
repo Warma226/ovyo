@@ -1,5 +1,5 @@
 "use client";
-// Le Grin : la boîte de réception de la communauté, préparée par VOA (community manager de la Page Facebook TUVOA).
+// Le Grin : la boîte de réception de la communauté, préparée par VOA (community manager de la Page Facebook du client).
 // Autonomie réglable (pause, VOA propose et je valide, VOA répond seule), réponses à valider avec choix du ton,
 // réponses enregistrées, humeur du grin, questions qui reviennent, radar à arnaques, grin du jeudi, piliers, brief du soir.
 import { useVoirPlus } from "@/components/VoirPlus";
@@ -17,7 +17,7 @@ type Etat = {
 };
 type Filtre = "tout" | "valider" | "message" | "commentaire" | "mention" | "arnaque" | "traite";
 
-const CANAL: Record<string, string> = { commentaire: "Commentaire", message: "Message privé", mention: "Mention de TUVOA", lien: "Publication", grin: "Grin du jeudi", piliers: "Piliers du grin", alerte: "Radar à arnaques", crise: "Mode crise" };
+const CANAL: Record<string, string> = { commentaire: "Commentaire", message: "Message privé", mention: "Mention de la Page", lien: "Publication", grin: "Grin du jeudi", piliers: "Piliers du grin", alerte: "Radar à arnaques", crise: "Mode crise" };
 const ETAT: Record<string, [string, string]> = {
   propose: ["À valider", "#E94A06"], signale: ["Pour vous", "#E94A06"], erreur: ["Erreur", "#B42318"], repondu: ["Répondu par VOA", "#16A34A"],
   aime: ["Aimé", "#16A34A"], masque: ["Masqué", "#5B6B86"], ignore: ["Ignoré", "#9AA8BE"], lien: ["Lien ajouté", "#2563EB"], publie: ["Publié", "#2563EB"], annule: ["Annulé", "#5B6B86"],

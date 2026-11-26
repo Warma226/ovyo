@@ -1,4 +1,4 @@
-// Configuration éditoriale de TUVOA : sources, rubriques, déclencheurs, garde-fous.
+// Configuration éditoriale d'un espace Ovyo : sources, rubriques, déclencheurs, garde-fous.
 // Modifie ce fichier pour ajouter une source ou un déclencheur.
 
 export type Platform = "facebook" | "linkedin" | "tiktok" | "wordpress";
@@ -97,7 +97,7 @@ export const SOURCES: Source[] = [
 ];
 
 // `poids` : points de pertinence ajoutés quand le thème est détecté (la veille classe les actus avec).
-// Les annonces de nouveaux smartphones intéressent peu le public de TUVOA : elles ne sont pas mises en avant.
+// Les annonces de nouveaux smartphones intéressent peu le public : elles ne sont pas mises en avant.
 export const TOPICS: { id: string; label: string; keywords: string[]; poids: number }[] = [
   { id: "burkina", label: "Burkina Faso", poids: 70, keywords: ["burkina", "burkinabè", "burkinabe", "ouaga", "ouagadougou", "bobo-dioulasso", "koudougou", "faso"] },
   { id: "evenements", label: "Événements tech", poids: 20, keywords: ["forum ia", "cyber africa", "africa tech summit", "innov africa", "gitex", "hackathon", "salon du numérique", "semaine du numérique", "sitic"] },
@@ -113,7 +113,7 @@ export const TOPICS: { id: string; label: string; keywords: string[]; poids: num
 
 export type TriggerFormat = "resume" | "explication" | "les-deux";
 export type TriggerMode = "general" | "manuel";
-// Image jointe au post : seul le visuel TUVOA généré est branché pour l'instant.
+// Image jointe au post : seul le visuel généré est branché pour l'instant.
 export type TriggerImage = "visuel" | "presse" | "banque";
 export type Trigger = {
   id: string;
@@ -149,7 +149,7 @@ export const TRIGGERS: Trigger[] = [
     format: "resume",
     platforms: ["facebook", "linkedin", "wordpress"],
     mode: "general",
-    enabledByDefault: false, // nouveaux smartphones : peu suivis par le public de TUVOA
+    enabledByDefault: false, // nouveaux smartphones : peu suivis par le public
   },
   {
     id: "ia-modele",
@@ -232,11 +232,10 @@ export function gardeFous(g?: { debut?: number; fin?: number; maxParJour?: numbe
 
 // Guide de style donné à l'IA à chaque rédaction
 export const STYLE_GUIDE = `
-Tu écris pour TUVOA Tech Media (anciennement Warmachiner Tech), média burkinabè et africain d'infos et de formation en technologies, fondé en 2021 (site : www.tuvoa.media).
-Mission : « On décode la tech pour que chacun puisse s'en servir, pas juste la subir. » Conviction : la technologie n'a de valeur que si elle est comprise, et d'impact que si elle est partagée.
-Ligne éditoriale : uniquement la tech, traduite, ancrée dans les réalités locales et expliquée sans jargon, pour un public jeune. Priorité au Burkina Faso, puis à l'Afrique de l'Ouest et au continent : cybersécurité et arnaques, IA, crypto et blockchain, mobile money et télécoms, réseaux sociaux, robotique, startups, et les grands rendez-vous tech africains (Forum IA Ouaga, Forum Cyber Africa, Africa Tech Summit, Innov Africa…).
-Le Burkina Faso passe toujours en premier : une actu burkinabè est mise en avant dès la première phrase ; quand une actu mondiale ou africaine a un effet concret pour les lecteurs au Burkina (prix, accès, sécurité, emploi, opérateurs Orange, Moov, Telecel, mobile money), dis-le en une phrase, sans rien inventer.
-Les annonces de nouveaux smartphones n'intéressent que si elles concernent l'Afrique (prix, disponibilité, modèles vendus localement) : sinon, reste bref.
+Tu écris pour {{IDENTITE}}
+{{MISSION}}
+Ligne éditoriale : {{LIGNE}}.
+Priorité géographique : {{PAYS}} passe toujours en premier. Une actu locale est mise en avant dès la première phrase ; quand une actu internationale a un effet concret pour le public de {{PAYS}} (prix, accès, sécurité, emploi, services locaux), dis-le en une phrase, sans rien inventer.
 Ton : celui d'un média d'information tech sérieux. Neutre, factuel, rigoureux, à la troisième personne : pas de tutoiement, pas d'interpellation du lecteur, pas de formule familière, pas de « tu vois ? ».
 Le post résume l'information : qui, quoi, quand, chiffres clés, conséquences. Pas de conseils au lecteur sauf si l'info l'exige (ex. mise à jour de sécurité urgente), formulés sobrement.
 Public : lecteurs francophones, en particulier en Afrique de l'Ouest ; explique brièvement le jargon.

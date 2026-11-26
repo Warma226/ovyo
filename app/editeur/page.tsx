@@ -1,5 +1,6 @@
 "use client";
 // Éditeur de texte (écran 7 de la maquette) : texte commun, versions par plateforme, assistant IA.
+import { marqueSync, useMarque } from "@/components/useMarque";
 import { SourceLogo } from "@/components/SourceLogo";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,7 +20,7 @@ const ACTIONS: { id: string; label: string }[] = [
   { id: "raccourcir", label: "Raccourcir" },
   { id: "reformuler", label: "Reformuler" },
   { id: "expliquer", label: "Expliquer simplement" },
-  { id: "ton", label: "Ton TUVOA" },
+  { id: "ton", label: "Ton de la marque" },
   { id: "traduire", label: "En français" },
 ];
 
@@ -46,7 +47,7 @@ function verdict(tab: Tab, n: number): [string, boolean] {
   if (n > t.ideal[1]) return [tab === "facebook" ? `${n - t.ideal[1]} car. de trop pour être lu en entier sur ordinateur` : `${(n - t.ideal[1]).toLocaleString("fr-FR")} ${t.unite} au-delà de la zone idéale`, false];
   return ["Dans la zone idéale", true];
 }
-const NOM: Record<Tab, string> = { commun: "Texte commun", facebook: "Facebook", linkedin: "LinkedIn", tiktok: "TikTok", wordpress: "Site tuvoa.media" };
+const NOM: Record<Tab, string> = { commun: "Texte commun", facebook: "Facebook", linkedin: "LinkedIn", tiktok: "TikTok", wordpress: "Site web" };
 const ICO: Record<Tab, [string, string]> = { commun: ["≡", "#5B6B86"], facebook: ["F", "#1877F2"], linkedin: ["in", "#0A66C2"], tiktok: ["T", "#0B1A33"], wordpress: ["W", "#0A2A66"] };
 
 // Hashtags proposés à partir de la rubrique, des thèmes détectés et des produits cités.
@@ -59,7 +60,7 @@ function suggestHashtags(post: Post, text: string): string[] {
   if (rub) out.push(rub.hashtag);
   out.push("#Tech");
   TOPICS.filter((t) => t.poids > 0 && t.keywords.some((k) => low.includes(k))).forEach((t) => out.push(`#${t.label.normalize("NFD").replace(/[^A-Za-z0-9]/g, "")}`));
-  out.push("#TUVOA");
+  if (marqueSync().tag) out.push(`#${marqueSync().tag}`);
   return Array.from(new Set(out)).slice(0, 6);
 }
 
@@ -90,6 +91,7 @@ export default function EditeurPage() {
 }
 
 function Editeur() {
+  const marque = useMarque();
   const q = useSearchParams();
   const router = useRouter();
   const id = q.get("id");
@@ -469,7 +471,7 @@ function Editeur() {
                   <label className="field">Auteur<input type="text" value={current.visual.nom ?? ""} disabled={verrouille} onChange={(e) => update({ ...current, visual: { ...current.visual, nom: e.target.value, titre: e.target.value } })} /></label>
                   <label className="field">Fonction<input type="text" value={current.visual.specialite ?? ""} disabled={verrouille} onChange={(e) => update({ ...current, visual: { ...current.visual, specialite: e.target.value } })} /></label>
                 </div>
-                <ImageField label="Photo de l'auteur" hint="Placée sur le visuel. Une photo dont TUVOA a le droit d'usage." disabled={verrouille} value={current.visual.photo ?? ""} onChange={(url) => update({ ...current, visual: { ...current.visual, photo: url || undefined } })} />
+                <ImageField label="Photo de l'auteur" hint="Placée sur le visuel. Une photo dont vous avez le droit d'usage." disabled={verrouille} value={current.visual.photo ?? ""} onChange={(url) => update({ ...current, visual: { ...current.visual, photo: url || undefined } })} />
               </section>
             ) : null}
 
@@ -491,7 +493,7 @@ function Editeur() {
               <div className="row"><h2 id="t-apercu" className="tv-h2" style={{ fontSize: 17, flex: 1 }}>Aperçu en direct</h2><span className="tv-gris" style={{ fontSize: 12 }}>{tab === "wordpress" ? "Google" : `${tab === "commun" ? "Facebook" : NOM[tab]} · téléphone`}</span></div>
               {tab === "wordpress" ? (
                 <div className="tv-google">
-                  <span style={{ fontSize: 12, color: "#33425C" }}>tuvoa.media › actualites</span>
+                  <span style={{ fontSize: 12, color: "#33425C" }}>{(marque.site || "votre site")} › actualites</span>
                   <strong>{titreWp.length > 60 ? `${titreWp.slice(0, 58).replace(/\s+\S*$/, "")} …` : titreWp || "Titre de l'article"}</strong>
                   <span style={{ fontSize: 13, color: "#33425C", lineHeight: 1.5 }}>{meta ? (meta.length > 158 ? `${meta.slice(0, 155).replace(/\s+\S*$/, "")} …` : meta) : "Ajoutez une méta-description : c'est le texte affiché sous le titre dans Google."}</span>
                 </div>

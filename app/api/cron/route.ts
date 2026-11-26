@@ -1,6 +1,7 @@
 // Tâche planifiée (appelée toutes les 15 min par Supabase pg_cron) :
 // 1. autopilote : choisit la meilleure actu, la rédige et la planifie ; 2. publie les posts planifiés arrivés à échéance.
 import { parEspace, limiteEssai } from "@/lib/plateforme";
+import { marque } from "@/lib/marque";
 import { NextResponse } from "next/server";
 import { fetchVeille, fetchArticle, similar } from "@/lib/veille";
 import { generatePost, generateRecap, aiConfigured, sameStoryAs } from "@/lib/claude";
@@ -238,13 +239,15 @@ async function weeklyRecap(log: string[], opts: { force: boolean; dry: boolean }
     const recentes = [...week].reverse().filter((p) => images.has(p.id)).slice(0, 8);
     const court = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" }).replace(/^1 /, "1er ");
     const total = r.points.length;
+    const mq = await marque();
+    const marqueRecap = { nom: mq.nom, site: mq.site };
     const slides = [
       coverUrl({
         periode: `${court(monday)} – ${court(now)}`,
         count: total,
         photos: recentes.map((p) => images.get(p.id) ?? ""),
         categories: recentes.map((p) => p.visual.titre || "Actu tech"),
-      }),
+      }, marqueRecap),
       ...r.points.map((pt, i) => {
         const src = base[pt.n - 1];
         return itemUrl({
@@ -255,9 +258,9 @@ async function weeklyRecap(log: string[], opts: { force: boolean; dry: boolean }
           photo: (src ? images.get(src.id) : undefined) ?? images.get(recentes[i % Math.max(1, recentes.length)]?.id ?? ""),
           source: src?.source_name ?? undefined,
           autres: recentes.filter((p) => p.id !== src?.id).slice(0, 4).map((p) => ({ photo: images.get(p.id), categorie: p.visual.titre || "Actu tech" })),
-        });
+        }, marqueRecap);
       }),
-      endUrl(),
+      endUrl(marqueRecap),
     ];
     const image = slides[0];
     if (opts.dry) return { ...r, image, slides, platforms, posts: week.length };

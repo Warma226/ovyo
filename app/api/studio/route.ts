@@ -5,7 +5,7 @@ import { emptyPost, savePost } from "@/lib/store";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const IDENTITE = "TUVOA Tech Media, média tech burkinabè et africain (actualité tech, cybersécurité, IA, mobile money, réseaux sociaux, startups), site warmachinertech.com";
+const IDENTITE = "{{IDENTITE}}";
 
 type ElTexte = { id: string; role: string; type: "texte" | "carte"; texte?: string; carte?: { titre: string; etat: string; texte: string; bouton: string } };
 

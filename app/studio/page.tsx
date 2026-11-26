@@ -18,7 +18,7 @@ import { useVoirPlus } from "@/components/VoirPlus";
 import { logo as elementsLogo } from "@/lib/creation";
 import { listPosts } from "@/lib/client";
 
-const CLE_BROUILLON = "tuvoa-studio-brouillon";
+const CLE_BROUILLON = "ovyo-studio-brouillon";
 const ENTREES: [Entree, string][] = [["aucune", "Aucune"], ["fondu", "Fondu"], ["glisser-haut", "Glisse du bas"], ["glisser-bas", "Glisse du haut"], ["glisser-gauche", "Glisse de la droite"], ["glisser-droite", "Glisse de la gauche"], ["zoom", "Zoom"], ["pop", "Pop (rebond)"], ["machine", "Machine à écrire"]];
 const BOUCLES: [Boucle, string][] = [["aucune", "Aucune"], ["flotter", "Flotter"], ["pulser", "Pulser"], ["balancer", "Balancer"], ["tourner", "Tourner"], ["defiler", "Défiler (bandeau)"], ["clignoter", "Clignoter"], ["trembler", "Trembler"]];
 const OMBRES: [Ombre, string][] = [["aucune", "Aucune"], ["douce", "Douce"], ["forte", "Forte"], ["neon", "Néon bleu"], ["verre", "Verre"]];
@@ -87,8 +87,8 @@ function controler(doc: Doc): Point[] {
   }
   const faibles = textes.filter(({ e, p }) => { const c = contraste(e.couleur ?? "#FFFFFF", e.fond ?? p.fond); return c !== null && c < ((e.police ?? 0) * vu >= 18 ? 3 : 4.5); });
   out.push({ ok: faibles.length === 0, texte: faibles.length ? `Contraste trop faible : « ${(faibles[0].e.texte ?? "").slice(0, 24)}… »` : "Contraste suffisant sur les fonds unis", el: faibles[0]?.e.id, page: faibles[0]?.i });
-  const sansLogo = doc.pages.findIndex((p) => !p.elements.some((e) => (e.nom ?? "").startsWith("Logo") || (e.texte ?? "").trim().toUpperCase() === "TUVOA"));
-  out.push({ ok: sansLogo === -1 || (doc.pages.length > 1 && sansLogo > 0), texte: sansLogo === -1 ? "Logo TUVOA présent" : sansLogo === 0 ? "Logo TUVOA absent de la première page" : "Logo TUVOA sur la couverture", page: sansLogo === 0 ? 0 : undefined });
+  const sansLogo = doc.pages.findIndex((p) => !p.elements.some((e) => (e.nom ?? "").startsWith("Logo") || (e.texte ?? "").trim().toUpperCase() === "Ovyo"));
+  out.push({ ok: sansLogo === -1 || (doc.pages.length > 1 && sansLogo > 0), texte: sansLogo === -1 ? "Logo Ovyo présent" : sansLogo === 0 ? "Logo Ovyo absent de la première page" : "Logo Ovyo sur la couverture", page: sansLogo === 0 ? 0 : undefined });
   const z = ZONE[doc.format];
   const hors = doc.pages.flatMap((p, i) => p.elements.filter((e) => ["texte", "icone", "carte"].includes(e.type) && (e.x < W * z.g - 2 || e.y < H * z.h - 2 || e.x + e.w > W * (1 - z.d) + 2 || e.y + e.h > H * (1 - z.b) + 2)).map((e) => ({ e, i })));
   out.push({ ok: hors.length === 0, texte: hors.length ? `${hors.length} élément${hors.length > 1 ? "s" : ""} hors de la zone sûre (« ${hors[0].e.nom ?? hors[0].e.type} »)` : `Tout est dans la zone sûre${doc.format === "story" ? " de TikTok et des stories" : ""}`, el: hors[0]?.e.id, page: hors[0]?.i });
@@ -141,7 +141,7 @@ export default function Studio() {
   const elSel = page.elements.find((e) => e.id === sel) ?? null;
   const echelle = largeurVue / W;
 
-  // Police TUVOA pour le canvas
+  // Police Ovyo pour le canvas
   useEffect(() => {
     POLICE.famille = `${montserrat.style.fontFamily}, Montserrat, sans-serif`;
     const f = montserrat.style.fontFamily.split(",")[0].replace(/['"]/g, "");
@@ -157,7 +157,7 @@ export default function Studio() {
         setBrouillon(d);
         if (new URLSearchParams(window.location.search).get("reprendre") === "1") {
           setDoc(d); setPageIdx(0); setEnVideo(d.genre === "video"); setEtape("editeur");
-          const l = localStorage.getItem("tuvoa-studio-legende"); if (l) { setLegende(l); localStorage.removeItem("tuvoa-studio-legende"); }
+          const l = localStorage.getItem("ovyo-studio-legende"); if (l) { setLegende(l); localStorage.removeItem("ovyo-studio-legende"); }
           window.history.replaceState(null, "", "/studio");
         }
       }
@@ -306,7 +306,7 @@ export default function Studio() {
     setBusy("png"); setError("");
     try {
       const liste = toutes ? doc.pages : [page];
-      for (const [i, p] of liste.entries()) telecharger(await versBlob(rendrePage(p)), `TUVOA_${toutes ? `page${i + 1}` : `page${pageIdx + 1}`}.png`);
+      for (const [i, p] of liste.entries()) telecharger(await versBlob(rendrePage(p)), `Ovyo_${toutes ? `page${i + 1}` : `page${pageIdx + 1}`}.png`);
     } catch (e) { setError((e as Error).message); } finally { setBusy(""); }
   }
 
@@ -356,7 +356,7 @@ export default function Studio() {
   }
   async function exporterVideo() {
     setBusy("video"); setError("");
-    try { const v = await enregistrerVideo(); telecharger(v.blob, `TUVOA_video.${v.ext}`); }
+    try { const v = await enregistrerVideo(); telecharger(v.blob, `Ovyo_video.${v.ext}`); }
     catch (e) { setError((e as Error).message); } finally { setBusy(""); setMsg(""); }
   }
 
@@ -461,7 +461,7 @@ export default function Studio() {
           <div style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
             <Link href="/creer" className="tv-gris" style={{ textDecoration: "none", fontWeight: 600 }}>← Créer</Link>
             <h1 className="tv-titre" style={{ fontFamily: "var(--font-mont), sans-serif" }}>Studio</h1>
-            <span style={{ fontSize: 14, color: "#33425C" }}>Visuels, carrousels et vidéos aux couleurs de TUVOA</span>
+            <span style={{ fontSize: 14, color: "#33425C" }}>Visuels, carrousels et vidéos aux couleurs de Ovyo</span>
           </div>
         </header>
       ) : null}
@@ -529,7 +529,7 @@ export default function Studio() {
 
             <section aria-labelledby="t-sa-modeles" className="tv-carte">
               <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
-                <h2 id="t-sa-modeles" className="tv-h2" style={{ fontSize: 18, flex: 1 }}>Modèles TUVOA</h2>
+                <h2 id="t-sa-modeles" className="tv-h2" style={{ fontSize: 18, flex: 1 }}>Modèles Ovyo</h2>
                 <div className="tv-segments" role="tablist" aria-label="Filtrer les modèles">
                   {([["tous", "Tous"], ...GENRES.map((g) => [g.id, g.nom])] as [Genre | "tous", string][]).map(([k, l]) => (
                     <button key={k} type="button" role="tab" aria-selected={filtreModeles === k} aria-pressed={filtreModeles === k} onClick={() => setFiltreModeles(k)}>{l}</button>
@@ -566,7 +566,7 @@ export default function Studio() {
             <section className="tv-carte-side" aria-labelledby="t-sa-charte">
               <h2 id="t-sa-charte" className="tv-h2" style={{ fontSize: 17 }}>La charte, toujours appliquée</h2>
               <div className="row" style={{ gap: 8 }}>{[["Nuit", "#0A2A66"], ["Bleu", "#2563EB"], ["Orange", "#E94A06"], ["Noir", "#0A0A0A"], ["Blanc", "#FFFFFF"]].map(([n, c]) => <span key={n} title={n} style={{ width: 30, height: 30, borderRadius: 9, background: c, border: "1px solid rgba(0,0,0,0.08)" }} />)}</div>
-              <span style={{ fontSize: 13, color: "#33425C", lineHeight: 1.45 }}>Montserrat pour les titres, logo TUVOA en haut à gauche, zone sûre réservée aux interfaces de TikTok et des Reels.</span>
+              <span style={{ fontSize: 13, color: "#33425C", lineHeight: 1.45 }}>Montserrat pour les titres, logo Ovyo en haut à gauche, zone sûre réservée aux interfaces de TikTok et des Reels.</span>
             </section>
             <section className="tv-sa-voix" aria-labelledby="t-sa-voix">
               <Voa humeur="veille" taille={40} />
@@ -700,7 +700,7 @@ export default function Studio() {
                   <span className="barre" />
                   <span className="post-fantome" />
                   <div className="post">
-                    <span className="row" style={{ gap: 6, padding: 6 }}><span style={{ width: 16, height: 16, borderRadius: 8, background: "#0A2A66" }} /><span style={{ fontSize: 9, fontWeight: 700 }}>TUVOA Tech Media</span></span>
+                    <span className="row" style={{ gap: 6, padding: 6 }}><span style={{ width: 16, height: 16, borderRadius: 8, background: "#0A2A66" }} /><span style={{ fontSize: 9, fontWeight: 700 }}>Ovyo Tech Media</span></span>
                     <span style={{ display: "block", padding: "0 6px 6px", fontSize: 8, lineHeight: 1.35, color: "#050505" }}>{(legende || "Le texte du post apparaît ici.").slice(0, 70)}{legende.length > 70 ? "… " : " "}<span style={{ color: "#65676B" }}>Voir plus</span></span>
                     <Miniature page={page} format={doc.format} images={images.current} version={version} actif={false} onClick={() => undefined} numero={pageIdx + 1} largeur={168} />
                   </div>
@@ -732,7 +732,7 @@ export default function Studio() {
               );
             })()}
             <section className="tv-carte-side" aria-labelledby="t-charte">
-              <h2 id="t-charte" className="tv-h2" style={{ fontSize: 16 }}>Charte TUVOA</h2>
+              <h2 id="t-charte" className="tv-h2" style={{ fontSize: 16 }}>Charte Ovyo</h2>
               <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
                 {([["#0A2A66", "Nuit"], ["#2563EB", "Bleu"], ["#6E9BFF", "Bleu clair"], ["#E94A06", "Orange"], ["#F2EFE8", "Crème"], ["#FFFFFF", "Blanc"]] as const).map(([c, n]) => (
                   <button key={c} type="button" title={elSel ? `Appliquer ${n}` : n} aria-label={elSel ? `Appliquer la couleur ${n} à l'élément` : `Couleur ${n}`} disabled={!elSel}
@@ -743,7 +743,7 @@ export default function Studio() {
                 ))}
               </div>
               <span className="tv-gris" style={{ fontSize: 12 }}>Montserrat pour les titres, Inter pour les textes. {elSel ? "Cliquez une couleur pour l'appliquer à l'élément choisi." : "Choisissez un élément pour lui appliquer une couleur."}</span>
-              <button type="button" className="btn small" style={{ alignSelf: "flex-start" }} onClick={() => { const els = elementsLogo(Math.round(FORMATS[doc.format].w * ZONE[doc.format].g) + 8, Math.round(FORMATS[doc.format].h * ZONE[doc.format].h) + 8, true); changer((d) => { d.pages[pageIdx].elements.push(...els); return d; }); }}>Ajouter le logo TUVOA</button>
+              <button type="button" className="btn small" style={{ alignSelf: "flex-start" }} onClick={() => { const els = elementsLogo(Math.round(FORMATS[doc.format].w * ZONE[doc.format].g) + 8, Math.round(FORMATS[doc.format].h * ZONE[doc.format].h) + 8, true); changer((d) => { d.pages[pageIdx].elements.push(...els); return d; }); }}>Ajouter le logo Ovyo</button>
             </section>
             {elSel ? (
               <section className="card" style={{ gap: 10 }}>

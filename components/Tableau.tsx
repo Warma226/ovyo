@@ -111,7 +111,7 @@ export function Disque({ s, o }: { s: Stockage; o: Ouvrir }) {
     <Cible cat={null} o={o} className="tv-disque">
       <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true" style={{ flexShrink: 0 }}><rect x="6" y="18" width="52" height="30" rx="5" fill="#E7ECF4" stroke="#9AA8BE" strokeWidth="2" /><rect x="6" y="38" width="52" height="10" rx="3" fill="#C9D3E3" /><circle cx="49" cy="43" r="2.5" fill="#22C55E" /><rect x="16" y="24" width="18" height="10" rx="2" fill="#2563EB" /><path d="M19 27h12M19 31h8" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" /></svg>
       <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
-        <strong style={{ fontSize: 15 }}>Stockage TUVOA (T:)</strong>
+        <strong style={{ fontSize: 15 }}>Stockage Ovyo (O:)</strong>
         <span className="tv-win-bar" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)} aria-label="Espace utilisé"><span style={{ width: `${pct}%` }} /></span>
         <span style={{ fontSize: 13, color: "#5B6B86" }}>{taille(libre)} libres sur {taille(s.capacite)}</span>
       </span>

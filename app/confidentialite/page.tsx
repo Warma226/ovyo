@@ -1,32 +1,34 @@
-// Politique de confidentialité de TUVOA Studio (page publique, demandée par TikTok et Meta).
-export const metadata = { title: "Politique de confidentialité · TUVOA Studio" };
+// Politique de confidentialité d'Ovyo (page publique, demandée aussi par TikTok et Meta).
+export const metadata = { title: "Politique de confidentialité · Ovyo" };
 
 export default function Confidentialite() {
   return (
     <main style={{ maxWidth: 760, margin: "0 auto", padding: "40px 20px 80px", lineHeight: 1.65, fontSize: 16 }}>
-      <h1 style={{ fontSize: 28 }}>Politique de confidentialité de TUVOA Studio</h1>
-      <p style={{ color: "#667" }}>Dernière mise à jour : 5 novembre 2026</p>
+      <h1 style={{ fontSize: 28 }}>Politique de confidentialité d&apos;Ovyo</h1>
+      <p style={{ color: "#667" }}>Dernière mise à jour : 26 novembre 2026</p>
 
       <h2>1. Qui sommes-nous</h2>
-      <p>TUVOA Studio est l'outil de publication interne de TUVOA Tech Media. Il sert uniquement à publier les contenus de TUVOA sur ses propres comptes (site web, Facebook, LinkedIn, TikTok).</p>
+      <p>Ovyo est édité par Warmachiner Tech, Ouagadougou, Burkina Faso. Ovyo publie les contenus de ses clients sur leurs propres comptes (site web, Facebook, LinkedIn, TikTok) et les aide à répondre à leur communauté.</p>
 
       <h2>2. Données traitées</h2>
       <ul>
-        <li><strong>Comptes reliés</strong> : lorsque TUVOA relie l'un de ses comptes (par exemple TikTok), l'outil reçoit et conserve les jetons d'accès fournis par la plateforme, l'identifiant du compte et son nom d'affichage. Ces informations servent uniquement à publier les contenus de TUVOA sur ce compte.</li>
-        <li><strong>Contenus</strong> : textes, visuels et photos préparés par l'équipe TUVOA pour publication.</li>
+        <li><strong>Compte</strong> : nom, e-mail ou téléphone, mot de passe chiffré, rôle dans l&apos;équipe, appareils connectés.</li>
+        <li><strong>Espace client</strong> : nom de l&apos;organisation, logo, réglages éditoriaux, sources suivies.</li>
+        <li><strong>Comptes reliés</strong> : lorsqu&apos;un client relie un compte (par exemple TikTok), Ovyo conserve les jetons d&apos;accès fournis par la plateforme, l&apos;identifiant du compte et son nom d&apos;affichage.</li>
+        <li><strong>Contenus</strong> : textes, visuels et photos préparés pour publication, et commentaires publics reçus sur les Pages reliées, pour y répondre.</li>
       </ul>
-      <p>TUVOA Studio ne collecte pas de données sur les abonnés ou visiteurs des comptes de TUVOA, n'affiche pas de publicité et ne vend ni ne partage aucune donnée.</p>
+      <p>Ovyo n&apos;affiche pas de publicité et ne vend aucune donnée.</p>
 
       <h2>3. Conservation et sécurité</h2>
-      <p>Les jetons d'accès sont stockés côté serveur, dans une base de données protégée, et ne sont jamais affichés dans le navigateur. Ils sont conservés tant que le compte reste relié et supprimés lorsque TUVOA retire l'autorisation.</p>
+      <p>Les données sont stockées dans une base protégée ; les jetons d&apos;accès restent côté serveur et ne s&apos;affichent jamais dans le navigateur. Chaque espace client est isolé des autres. À la fermeture d&apos;un espace, ses données sont supprimées sous 30 jours.</p>
 
-      <h2>4. Retrait de l'autorisation</h2>
-      <p>Le titulaire d'un compte relié peut retirer l'accès de TUVOA Studio à tout moment depuis les paramètres de sécurité ou d'applications de la plateforme concernée (par exemple, dans TikTok : Paramètres et confidentialité › Sécurité › Applications et services).</p>
+      <h2>4. Vos droits</h2>
+      <p>Vous pouvez demander l&apos;accès, la correction ou la suppression de vos données. Le titulaire d&apos;un compte relié peut aussi retirer l&apos;accès d&apos;Ovyo à tout moment depuis les paramètres de la plateforme concernée (par exemple, dans TikTok : Paramètres et confidentialité › Sécurité › Applications autorisées).</p>
 
       <h2>5. Contact</h2>
-      <p>Pour toute question sur cette politique : TUVOA Tech Media, <a href="https://www.tuvoa.media">www.tuvoa.media</a>.</p>
+      <p>Warmachiner Tech, warmachinertech@gmail.com.</p>
 
-      <p style={{ marginTop: 32 }}><a href="/cgu">Conditions d'utilisation</a></p>
+      <p style={{ marginTop: 32 }}><a href="/cgu">Conditions d&apos;utilisation</a></p>
     </main>
   );
 }

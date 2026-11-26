@@ -1,5 +1,6 @@
 "use client";
 // Briques communes des ateliers de création (une page par rubrique, jamais mélangées).
+import { marqueSync } from "./useMarque";
 import Link from "next/link";
 import type { RubriqueId } from "@/lib/config";
 import type { Post } from "@/lib/store";
@@ -76,7 +77,7 @@ export function Jauge({ n, ideal, pli, max, unite = "car." }: { n: number; ideal
 export const CANAUX: { id: Post["platforms"][number]; ini: string; nom: string; c: string }[] = [
   { id: "facebook", ini: "F", nom: "Facebook", c: "#1877F2" },
   { id: "linkedin", ini: "in", nom: "LinkedIn", c: "#0A66C2" },
-  { id: "wordpress", ini: "W", nom: "Site tuvoa.media", c: "#0A2A66" },
+  { id: "wordpress", ini: "W", nom: "Site web", c: "#0A2A66" },
   { id: "tiktok", ini: "T", nom: "TikTok", c: "#0B1A33" },
 ];
 
@@ -156,7 +157,7 @@ export function ApercuFacebook({ texte, image, quand, vide, pli = 125 }: { texte
     <article className="tv-fb">
       <div className="row" style={{ gap: 10, padding: "12px 12px 8px" }}>
         <span style={{ width: 36, height: 36, borderRadius: 18, background: "#0A2A66", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><span style={{ width: 12, height: 12, borderRadius: 6, background: "#2563EB" }} /></span>
-        <span style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}><strong style={{ fontSize: 13 }}>TUVOA Tech Media</strong><span style={{ fontSize: 11, color: "#5B6B86" }}>{quand ?? "Brouillon"}</span></span>
+        <span style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}><strong style={{ fontSize: 13 }}>{marqueSync().nom || "Votre Page"}</strong><span style={{ fontSize: 11, color: "#5B6B86" }}>{quand ?? "Brouillon"}</span></span>
       </div>
       {texte ? (
         <p style={{ padding: "0 12px 10px", fontSize: 13, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>

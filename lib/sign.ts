@@ -1,8 +1,8 @@
-// Signature HMAC des liens de visuels, pour que seuls les liens générés par TUVOA fonctionnent.
+// Signature HMAC des liens de visuels, pour que seuls les liens générés par Ovyo fonctionnent.
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 function secret() {
-  return process.env.APP_SECRET || process.env.APP_PASSWORD || "tuvoa-dev-secret";
+  return process.env.APP_SECRET || process.env.APP_PASSWORD || "ovyo-dev-secret";
 }
 
 export function signParams(params: URLSearchParams): string {

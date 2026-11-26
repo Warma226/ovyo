@@ -1,5 +1,6 @@
 "use client";
 // Aperçu avant publication (écran 8 de la maquette) : rien ne part sans passer par cet écran (sauf autopilote).
+import { useMarque } from "@/components/useMarque";
 import { SourceLogo } from "@/components/SourceLogo";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
@@ -38,6 +39,7 @@ export default function ApercuPage() {
 }
 
 function Apercu() {
+  const marque = useMarque();
   const q = useSearchParams();
   const router = useRouter();
   const id = q.get("id");
@@ -214,7 +216,7 @@ function Apercu() {
                   <article className="post">
                     <div className="tete">
                       <span className="av">T</span>
-                      <span><strong>TUVOA</strong><small>{tab === "wordpress" ? "Article du site" : `${auHaut ? jourHeure(auHaut).j : "Brouillon"}${heure ? ` à ${heure}` : ""} · 🌐`}</small></span>
+                      <span><strong>{marque.nom || "Votre Page"}</strong><small>{tab === "wordpress" ? "Article du site" : `${auHaut ? jourHeure(auHaut).j : "Brouillon"}${heure ? ` à ${heure}` : ""} · 🌐`}</small></span>
                     </div>
                     {tab === "wordpress" ? <strong className="wp-titre">{current.texts.wp_title || "Sans titre"}</strong> : null}
                     {fullText ? <p>{court}{fullText.length > court.length ? <>… <span className="plus">Voir plus</span></> : null}</p> : <p className="tv-gris">Pas encore de texte pour {PLATFORM_LABEL[tab]}.</p>}

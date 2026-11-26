@@ -17,10 +17,10 @@ export type VeilleItem = {
   triggers: string[]; // déclencheurs correspondants
   blocked: boolean; // sujet sensible : jamais en automatique
   image: string; // image fournie par le flux RSS (secours si l'article n'en donne pas)
-  post?: { id: string; status: string; at: string | null }; // déjà repris dans une publication TUVOA
+  post?: { id: string; status: string; at: string | null }; // déjà repris dans une publication de l'espace
 };
 
-const parser = new Parser({ timeout: 12000, headers: { "User-Agent": "TUVOA-Veille/0.1 (+https://www.tuvoa.media)" }, customFields: { item: ["News:Source", "News:Image"] } });
+const parser = new Parser({ timeout: 12000, headers: { "User-Agent": "Ovyo-Veille/1.0" }, customFields: { item: ["News:Source", "News:Image"] } });
 
 // Flux d'actualités de moteurs (Bing News) : le lien passe par un redirecteur. On garde l'adresse réelle de l'article
 // et le nom du média d'origine, pour que la source citée dans les posts soit la bonne.
@@ -164,7 +164,7 @@ function articleImage(html: string, pageUrl: string): string {
 export async function fetchArticle(url: string): Promise<{ text: string; image: string }> {
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; TUVOA-Veille/0.1; +https://www.tuvoa.media)" },
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; Ovyo-Veille/1.0)" },
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return { text: "", image: "" };
@@ -196,7 +196,7 @@ export async function discoverSource(input: string): Promise<Source> {
   const candidates: string[] = [];
   let lang: "fr" | "en" = "fr";
   try {
-    const res = await fetch(url, { headers: { "User-Agent": "TUVOA-Veille/0.1 (+https://www.tuvoa.media)" }, signal: AbortSignal.timeout(12000) });
+    const res = await fetch(url, { headers: { "User-Agent": "Ovyo-Veille/1.0" }, signal: AbortSignal.timeout(12000) });
     const body = await res.text();
     if (/^\s*(<\?xml|<rss|<feed)/i.test(body)) {
       candidates.push(res.url || url.toString());

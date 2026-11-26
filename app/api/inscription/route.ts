@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   if (err) return NextResponse.json({ error: err }, { status: 400 });
   if (await contactPris(contact)) return NextResponse.json({ error: "Ce contact a déjà un compte Ovyo. Connectez-vous." }, { status: 409 });
 
-  // Adresse courte unique de l'espace (ex. « tuvoa-tech-media », « tuvoa-tech-media-2 »)
+  // Adresse courte unique de l'espace (ex. « radio-horizon », « radio-horizon-2 »)
   const base = slugDe(organisation);
   const { data: pris } = await dbBrut().from("ov_espaces").select("slug").like("slug", `${base}%`);
   const existants = new Set((pris ?? []).map((x) => x.slug as string));
