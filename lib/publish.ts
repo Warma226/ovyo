@@ -93,13 +93,8 @@ async function wpTagIds(names: string[]): Promise<number[]> {
 // Envoie une image dans la médiathèque avec sa légende et son texte alternatif.
 // Image allégée avant envoi : 1200 px de large au plus, WebP qualité 78 (souvent 5 à 10 fois plus léger qu'une photo d'origine).
 async function optimise(bytes: ArrayBuffer, type: string): Promise<{ body: ArrayBuffer | Uint8Array; type: string; ext: string; width?: number; height?: number }> {
-  try {
-    const sharp = (await import("sharp")).default;
-    const { data, info } = await sharp(Buffer.from(bytes)).rotate().resize({ width: 1200, withoutEnlargement: true }).webp({ quality: 78 }).toBuffer({ resolveWithObject: true });
-    return { body: new Uint8Array(data), type: "image/webp", ext: "webp", width: info.width, height: info.height };
-  } catch {
-    return { body: bytes, type, ext: type.includes("png") ? "png" : type.includes("webp") ? "webp" : "jpg" };
-  }
+  // Ovyo (Cloudflare) : pas de module natif d'images, l'image part telle quelle.
+  return { body: bytes, type, ext: type.includes("png") ? "png" : type.includes("webp") ? "webp" : "jpg" };
 }
 
 async function wpMedia(url: string, name: string, legende: string, alt: string): Promise<{ id: number; src: string; width?: number; height?: number } | null> {

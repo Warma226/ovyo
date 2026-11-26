@@ -18,9 +18,8 @@ async function safeImage(url: string | null): Promise<string | undefined> {
       return `data:${type === "image/jpg" ? "image/jpeg" : type};base64,${buf.toString("base64")}`;
     }
     // WebP, AVIF, GIF… (ou type mal déclaré) : converti en JPEG pour le moteur de rendu.
-    const sharp = (await import("sharp")).default;
-    const jpg = await sharp(buf, { animated: false }).rotate().resize({ width: 1400, height: 1400, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 82 }).toBuffer();
-    return `data:image/jpeg;base64,${jpg.toString("base64")}`;
+    // Ovyo (Cloudflare) : pas de conversion WebP/AVIF possible ici, le visuel se fait sans cette image.
+    return undefined;
   } catch {
     return undefined;
   }

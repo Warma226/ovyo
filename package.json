@@ -1,12 +1,15 @@
 {
-  "name": "tuvoa-app",
+  "name": "ovyo",
   "version": "0.1.0",
   "private": true,
-  "description": "TUVOA Tech Media – veille, création et publication de posts tech",
+  "description": "Ovyo — votre média tourne tout seul",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cf:build": "opennextjs-cloudflare build"
   },
   "engines": {
     "node": ">=20"
@@ -17,12 +20,13 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "rss-parser": "^3.13.0",
-    "sharp": "^0.33.5"
+    "@opennextjs/cloudflare": "^1.6.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.3",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "wrangler": "^4.40.0"
   }
 }

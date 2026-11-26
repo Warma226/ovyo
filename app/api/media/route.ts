@@ -11,7 +11,6 @@ export async function GET(req: Request) {
   const src = params.get("u") ?? "";
   const r = await fetch(src, { headers: { "User-Agent": "TUVOA-APP/1.0" } });
   if (!r.ok) return new Response("Image indisponible.", { status: 502 });
-  const sharp = (await import("sharp")).default;
-  const jpg = await sharp(Buffer.from(await r.arrayBuffer())).rotate().resize({ width: 1080, withoutEnlargement: true }).flatten({ background: "#ffffff" }).jpeg({ quality: 85 }).toBuffer();
-  return new Response(new Uint8Array(jpg), { headers: { "Content-Type": "image/jpeg", "Cache-Control": "public, max-age=86400" } });
+  // Ovyo (Cloudflare) : image transmise telle quelle (pas de module natif de conversion).
+  return new Response(await r.arrayBuffer(), { headers: { "Content-Type": r.headers.get("content-type") ?? "image/jpeg", "Cache-Control": "public, max-age=86400" } });
 }

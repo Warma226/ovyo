@@ -44,15 +44,8 @@ async function image(url: string): Promise<{ bytes: Buffer; type: string } | nul
   const ico = type.includes("icon") || /\.ico(\?|$)/i.test(url);
   if (!ico && !type.startsWith("image/")) return null;
   if (ico) return { bytes, type: "image/x-icon" }; // sharp ne lit pas les .ico : le navigateur, si
-  try {
-    const sharp = (await import("sharp")).default;
-    const meta = await sharp(bytes, { density: 300 }).metadata();
-    if (!meta.width || meta.width < 16) return null;
-    const png = await sharp(bytes, { density: 300 }).resize(128, 128, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
-    return { bytes: png, type: "image/png" };
-  } catch {
-    return { bytes, type };
-  }
+  // Ovyo (Cloudflare) : pas de conversion d'image, le logo est servi tel quel.
+  return { bytes, type };
 }
 
 export async function GET(req: Request) {
