@@ -3,6 +3,7 @@
 // ou l'enregistrement d'une publication. Ainsi chaque client publie sous SON nom.
 import { espaceCourant } from "./espace";
 import { lireEspace } from "./plateforme";
+import { crochetsIA } from "./claude";
 
 export type Profil = { description?: string; site?: string; pays?: string; ville?: string; mission?: string; ligne?: string; secteur?: string };
 export type Marque = { nom: string; tag: string; site: string; pays: string; identite: string; mission: string; ligne: string; logo: string | null; couleur: string };
@@ -57,3 +58,5 @@ export function appliquer(texte: string, m: Marque): string {
 export async function avecMarque(texte: string): Promise<string> {
   return texte.includes("{{") ? appliquer(texte, await marque()) : texte;
 }
+
+crochetsIA.marquer = avecMarque;

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generatePost, rewrite, draftWithoutAI, aiConfigured, type GenerateInput, type RewriteAction } from "@/lib/claude";
+import "@/lib/marque"; // identité du client dans les textes de l'IA
 import { fetchArticle } from "@/lib/veille";
 
 export const dynamic = "force-dynamic";

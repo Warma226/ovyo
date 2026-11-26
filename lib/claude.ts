@@ -1,7 +1,9 @@
 // Rédaction des posts avec Claude (API Messages d'Anthropic).
-import { marque, appliquer } from "./marque";
 import { STYLE_GUIDE, RUBRIQUES, WP_CATEGORIES_AUTO, type RubriqueId, type TriggerFormat } from "./config";
 import { convertirTout } from "./devises";
+
+// Branché côté serveur par lib/marque.ts (ce fichier est aussi importé par le navigateur pour draftWithoutAI).
+export const crochetsIA: { marquer: (t: string) => Promise<string> } = { marquer: async (t) => t };
 
 export type Generated = {
   variantes: string[];
@@ -134,8 +136,7 @@ async function callGemini(key: string, system: string, user: string, maxTokens: 
 
 async function callClaude(system: string, user: string, maxTokens = 2500, json = false): Promise<string> {
   // Identité du client (nom, pays, ligne éditoriale) insérée à la place des repères {{…}}
-  const m = await marque();
-  system = appliquer(system, m); user = appliquer(user, m);
+  system = await crochetsIA.marquer(system); user = await crochetsIA.marquer(user);
   const anthropic = process.env.ANTHROPIC_API_KEY;
   if (anthropic) return callAnthropic(anthropic, system, user, maxTokens);
   const gemini = process.env.GEMINI_API_KEY;
