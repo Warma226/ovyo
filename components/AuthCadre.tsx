@@ -16,7 +16,7 @@ export function AuthCadre({ titre, sousTitre, children, bas }: { titre: string; 
         <ul>
           {ATOUTS.map(([t, d]) => <li key={t}><i /><span><strong>{t}</strong>{d}</span></li>)}
         </ul>
-        <small>Essai gratuit de 14 jours · sans carte bancaire · paiement Mobile Money</small>
+        <small>Essai gratuit de 7 jours, 15 publications offertes · sans carte bancaire · paiement Mobile Money</small>
       </aside>
       <main className="ova-main">
         <div className="ova-carte">

@@ -7,6 +7,7 @@
 //   Burkina Faso en priorité. Photo libre de droits de l'auteur (Wikimedia Commons) obligatoire pour partir seule ;
 //   sans photo, la citation est mise « à valider » et vous êtes prévenue sur Telegram.
 // Rien ne se crée quand l'autopilote est coupé (ou en mode crise).
+import { limiteEssai } from "./plateforme";
 import { aiConfigured, aiJson, draftWithoutAI, generatePost } from "./claude";
 import { allSources, allTriggers, isOn, type Platform } from "./config";
 import { connectionStatus } from "./publish";
@@ -342,6 +343,8 @@ export async function rubriquesAuto(log: string[]) {
   if (!aiConfigured()) return void log.push("Rubriques auto : aucune clé d'IA.");
   const s = await getSettings();
   if (!s.autopilot) return void log.push("Rubriques auto : autopilote coupé.");
+  const essai = await limiteEssai();
+  if (essai) return void log.push(`Rubriques auto : ${essai}.`);
   for (const [nom, f] of [["CyberBase", () => cyberbaseDuJour(log)], ["Citation", () => citationsDuJour(log, 2)]] as const) {
     try { await f(); } catch (e) { log.push(`${nom} : ${(e as Error).message}`); }
   }

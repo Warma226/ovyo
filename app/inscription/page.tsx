@@ -1,5 +1,5 @@
 "use client";
-// Inscription : crée l'espace client (14 jours d'essai) et son compte administrateur.
+// Inscription : crée l'espace client (7 jours d'essai, 15 publications) et son compte administrateur.
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { AuthCadre } from "@/components/AuthCadre";
@@ -32,7 +32,7 @@ export default function Inscription() {
   }
 
   return (
-    <AuthCadre titre="Créez votre espace" sousTitre="14 jours gratuits, sans engagement. Prêt en une minute."
+    <AuthCadre titre="Créez votre espace" sousTitre="7 jours gratuits et 15 publications offertes. Prêt en une minute."
       bas={<>Déjà inscrit ? <a href="/acces">Se connecter</a></>}>
       <form onSubmit={submit} className="ova-form" noValidate>
         <label>Nom de votre organisation

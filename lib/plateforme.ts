@@ -1,14 +1,15 @@
 // Plateforme Ovyo : les espaces clients (un média, une entreprise, une agence, une institution…).
 // Côté serveur uniquement : ces fonctions lisent la base sans filtre d'espace.
 import { dbBrut } from "./store";
-import { avecEspace } from "./espace";
+import { avecEspace, espaceCourant } from "./espace";
 
 export type Espace = {
   id: string; nom: string; slug: string; logo: string | null; couleur: string | null;
   formule: string; statut: "essai" | "actif" | "suspendu" | "resilie";
   essai_fin: string | null; abonnement_fin: string | null; created_at: string;
 };
-export const ESSAI_JOURS = 14;
+export const ESSAI_JOURS = 7;
+export const ESSAI_MAX_POSTS = 15; // publications automatiques possibles pendant l'essai (quota d'IA partagé)
 
 // Un espace « tourne » (crons, publications) s'il est en essai non expiré ou abonné et à jour.
 export function espaceOuvert(e: Pick<Espace, "statut" | "essai_fin" | "abonnement_fin">): boolean {
@@ -16,6 +17,17 @@ export function espaceOuvert(e: Pick<Espace, "statut" | "essai_fin" | "abonnemen
   if (e.statut === "essai") return !e.essai_fin || new Date(e.essai_fin).getTime() > maintenant;
   if (e.statut === "actif") return !e.abonnement_fin || new Date(e.abonnement_fin).getTime() > maintenant;
   return false;
+}
+
+// Pendant l'essai, l'autopilote s'arrête après ESSAI_MAX_POSTS publications (planifiées ou publiées).
+// Renvoie la raison de l'arrêt, ou "" si l'espace peut continuer.
+export async function limiteEssai(): Promise<string> {
+  const E = espaceCourant();
+  if (!E) return "";
+  const e = await lireEspace(E);
+  if (!e || e.statut !== "essai") return "";
+  const { count } = await dbBrut().from("ov_posts").select("id", { count: "exact", head: true }).eq("espace_id", E).in("status", ["planifie", "publie"]);
+  return (count ?? 0) >= ESSAI_MAX_POSTS ? `limite de l'essai atteinte (${ESSAI_MAX_POSTS} publications) : abonnez-vous pour continuer` : "";
 }
 
 export async function lireEspace(id: string): Promise<Espace | null> {
