@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { BottomNav } from "@/components/BottomNav";
+import { BandeauAbonnement } from "@/components/BandeauAbonnement";
 
 // Polices intégrées à l'app (sous-ensemble latin des polices variables Google Fonts, licence OFL : app/fonts/LICENCE-OFL.txt).
 // Plus de téléchargement depuis Google pendant la compilation : c'était la cause des échecs de mise en ligne.
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr" className={`${inter.variable} ${archivo.variable} ${mont.variable} ${jakarta.variable}`}>
       <body>
         <div className="app">
+          <BandeauAbonnement />
           {children}
           <BottomNav />
         </div>

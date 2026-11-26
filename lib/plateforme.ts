@@ -3,6 +3,7 @@
 import { dbBrut } from "./store";
 import { avecEspace, espaceCourant } from "./espace";
 import { chargerConnexions } from "./connexions-espace";
+import { DUREE_JOURS, formuleDe } from "./formules";
 
 export type Espace = {
   id: string; nom: string; slug: string; logo: string | null; couleur: string | null;
@@ -22,14 +23,37 @@ export function espaceOuvert(e: Pick<Espace, "statut" | "essai_fin" | "abonnemen
 }
 
 // Pendant l'essai, l'autopilote s'arrête après ESSAI_MAX_POSTS publications (planifiées ou publiées).
+// Abonné : quota mensuel de la formule, compté sur la période payée en cours (30 jours).
 // Renvoie la raison de l'arrêt, ou "" si l'espace peut continuer.
 export async function limiteEssai(): Promise<string> {
   const E = espaceCourant();
   if (!E) return "";
   const e = await lireEspace(E);
-  if (!e || e.statut !== "essai") return "";
-  const { count } = await dbBrut().from("ov_posts").select("id", { count: "exact", head: true }).eq("espace_id", E).in("status", ["planifie", "publie"]);
-  return (count ?? 0) >= ESSAI_MAX_POSTS ? `limite de l'essai atteinte (${ESSAI_MAX_POSTS} publications) : abonnez-vous pour continuer` : "";
+  if (!e) return "";
+  if (!espaceOuvert(e)) return e.statut === "essai" ? "essai terminé : choisissez une formule pour continuer" : "abonnement expiré : renouvelez-le pour continuer";
+  const compter = async (depuis?: string) => {
+    let q = dbBrut().from("ov_posts").select("id", { count: "exact", head: true }).eq("espace_id", E).in("status", ["planifie", "publie"]);
+    if (depuis) q = q.gte("created_at", depuis);
+    return (await q).count ?? 0;
+  };
+  if (e.statut === "essai") {
+    return (await compter()) >= ESSAI_MAX_POSTS ? `limite de l'essai atteinte (${ESSAI_MAX_POSTS} publications) : choisissez une formule pour continuer` : "";
+  }
+  const max = formuleDe(e.formule)?.postsParMois;
+  if (e.statut !== "actif" || !max || !e.abonnement_fin) return "";
+  const debut = new Date(new Date(e.abonnement_fin).getTime() - DUREE_JOURS * 864e5).toISOString();
+  return (await compter(debut)) >= max ? `quota du mois atteint (${max} publications, formule ${formuleDe(e.formule)?.nom}) : passez à la formule supérieure ou attendez le renouvellement` : "";
+}
+
+// Paiement reçu : ajoute 30 jours à l'abonnement (à partir de sa fin si elle est encore à venir).
+export async function prolongerAbonnement(id: string, formule: string): Promise<string> {
+  const e = await lireEspace(id);
+  if (!e) throw new Error("espace introuvable");
+  const base = e.statut === "actif" && e.abonnement_fin && new Date(e.abonnement_fin).getTime() > Date.now() ? new Date(e.abonnement_fin).getTime() : Date.now();
+  const fin = new Date(base + DUREE_JOURS * 864e5).toISOString();
+  const { error } = await dbBrut().from("ov_espaces").update({ statut: "actif", formule, abonnement_fin: fin }).eq("id", id);
+  if (error) throw new Error(error.message);
+  return fin;
 }
 
 export async function lireEspace(id: string): Promise<Espace | null> {

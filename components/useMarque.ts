@@ -2,7 +2,7 @@
 // Identité de l'espace client connecté, chargée une fois puis partagée par toutes les pages.
 import { useEffect, useState } from "react";
 
-export type MarqueClient = { nom: string; tag: string; site: string; logo: string | null; couleur: string; statut: string | null; essai_fin: string | null; configure?: boolean; rubriques?: string[]; type?: string | null };
+export type MarqueClient = { nom: string; tag: string; site: string; logo: string | null; couleur: string; statut: string | null; essai_fin: string | null; abonnement_fin?: string | null; formule?: string | null; configure?: boolean; rubriques?: string[]; type?: string | null };
 const VIDE: MarqueClient = { nom: "", tag: "", site: "", logo: null, couleur: "#2563EB", statut: null, essai_fin: null };
 let memo: MarqueClient | null = null;
 let attente: Promise<MarqueClient> | null = null;

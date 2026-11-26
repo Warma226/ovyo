@@ -50,6 +50,7 @@ const MENU: { href: string; label: string; d: string; badge?: "grin" }[] = [
   { href: "/sources", label: "Sources", d: NAV_ICONS.sources },
   { href: "/declencheurs", label: "Déclencheurs", d: NAV_ICONS.eclair },
   { href: "/connexions", label: "Connexions", d: NAV_ICONS.cnx },
+  { href: "/abonnement", label: "Abonnement", d: "M3 6h18v12H3zM3 10h18M7 15h4" },
 ];
 
 const ONGLETS: { href: string; label: string; d: string }[] = [

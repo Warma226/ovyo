@@ -19,6 +19,7 @@ function Raccourcis() {
     ["/declencheurs", "Déclencheurs", "M13 2L4 14h7l-1 8 9-12h-7z"],
     ["/connexions", "Connexions", "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"],
     ["/sources", "Sources", "M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16M5 19a1 1 0 1 0 0-.01"],
+    ["/abonnement", "Abonnement", "M3 6h18v12H3zM3 10h18M7 15h4"],
     ["/mediatheque", "Médiathèque", "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM8 15l3-3 2 2 3-3 3 4"],
   ].filter(([h]) => !moi || lienVisible(moi.role, h));
   return (
