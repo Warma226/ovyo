@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { db, isDemo } from "@/lib/store";
 import { cmDiagnostic, cmJeton } from "@/lib/cm";
@@ -14,6 +15,7 @@ type Ligne = { id: string; title: string | null; idea: string | null; scheduled_
 // GET /api/connexions/sante → état de santé des comptes : dernières publications réussies, incidents,
 // jeton Facebook (date d'expiration et autorisations, jamais le jeton), stockage. Aucun secret renvoyé.
 export async function GET() {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   if (isDemo()) return NextResponse.json({ demo: true });
   const depuis = new Date(Date.now() - 14 * 864e5).toISOString();
   const [posts, jeton, diag, stockage] = await Promise.all([

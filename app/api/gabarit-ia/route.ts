@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { aiJson, aiConfigured } from "@/lib/claude";
 import "@/lib/marque";
@@ -11,6 +12,7 @@ export const maxDuration = 60;
 // POST { rubrique, idee?, champs? } → { champs, texte, image }
 // Avec « idee », l'IA remplit les champs du gabarit et écrit le texte du post ; sans, on renvoie seulement l'aperçu.
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const b = (await req.json().catch(() => ({}))) as { rubrique?: string; idee?: string; champs?: Champs };
   const g = b.rubrique ? GABARITS[b.rubrique] : undefined;
   if (!g || !b.rubrique) return NextResponse.json({ error: "Rubrique inconnue." }, { status: 400 });

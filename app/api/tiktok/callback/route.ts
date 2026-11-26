@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { exchangeCode } from "@/lib/tiktok";
@@ -6,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 // GET → retour de TikTok après autorisation : enregistre les jetons puis renvoie vers Connexions.
 export async function GET(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const url = new URL(req.url);
   const back = (msg: string) => NextResponse.redirect(new URL(`/connexions?tiktok=${encodeURIComponent(msg)}`, url.origin));
   if (url.searchParams.get("error")) return back(url.searchParams.get("error_description") || "Autorisation refusée.");

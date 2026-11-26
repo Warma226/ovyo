@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { fetchVeille } from "@/lib/veille";
 import { getSettings, postsParUrl, urlNette } from "@/lib/store";
@@ -26,6 +27,7 @@ async function run(sources: Source[], triggers: Trigger[]) {
 
 // GET : réglages enregistrés sur le serveur.
 export async function GET() {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const s = await getSettings();
   return run(
     allSources(s.customSources).filter((x) => isOn(s.sourcesEnabled, x.id, x.enabledByDefault)),
@@ -35,6 +37,7 @@ export async function GET() {
 
 // POST { sources, triggers } : le navigateur impose ses réglages (mode démo, sources ajoutées).
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const body = (await req.json().catch(() => ({}))) as { sources?: Source[]; triggers?: Trigger[] };
   const sources = (Array.isArray(body.sources) ? body.sources : []).filter((s) => typeof s?.feed === "string" && /^https?:\/\//.test(s.feed));
   const triggers = Array.isArray(body.triggers) ? body.triggers : [];

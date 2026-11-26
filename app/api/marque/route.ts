@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { marque } from "@/lib/marque";
 import { lireEspace } from "@/lib/plateforme";
@@ -7,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 // GET → identité de l'espace connecté (nom, site, logo, couleur), pour l'affichage dans l'app.
 export async function GET() {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const m = await marque();
   const e = espaceCourant() ? await lireEspace(espaceCourant() as string) : null;
   return NextResponse.json({

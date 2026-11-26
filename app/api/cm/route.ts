@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { cmAimer, cmAnnuler, cmDebutCrise, cmDiagnostic, cmEtat, cmFinCrise, cmMarquerTraite, cmMasquer, cmPassage, cmRapport, cmReformuler, cmRepondre, cmSauverReglages, type CmReglages } from "@/lib/cm";
 
@@ -6,6 +7,7 @@ export const maxDuration = 300;
 
 // GET → état de l'agent (réglages, à traiter, journal, dernier rapport) ; ?diag=1 → ce que le jeton Facebook permet.
 export async function GET(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const diag = new URL(req.url).searchParams.get("diag") === "1";
     return NextResponse.json({ ...(await cmEtat()), ...(diag ? { diagnostic: await cmDiagnostic() } : {}) });
@@ -16,6 +18,7 @@ export async function GET(req: Request) {
 
 // POST → { reglages } | { traite: id } | { lancer: true } | { rapport: true } | { annuler: id } | { finCrise: true }
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const b = (await req.json().catch(() => ({}))) as {
       reglages?: Partial<CmReglages>; traite?: string; lancer?: boolean; rapport?: boolean; annuler?: string; finCrise?: boolean;

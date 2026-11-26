@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/store";
 import { fermerSessions, inviter, listerMembres, majMembre, renouvelerInvitation, retirerMembre } from "@/lib/equipe";
@@ -7,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 // Réservé à l'administrateur principal (middleware). GET : équipe, publications par membre, journal.
 export async function GET() {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const membres = await listerMembres();
     const depuis = new Date(Date.now() - 7 * 864e5).toISOString();
@@ -23,6 +25,7 @@ export async function GET() {
 
 // POST { action: "inviter" | "role" | "suspendre" | "reactiver" | "retirer" | "lien", … }
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const b = (await req.json().catch(() => ({}))) as { action?: string; id?: string; nom?: string; contact?: string; role?: Role };
     if (b.action === "inviter") {

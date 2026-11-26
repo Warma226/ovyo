@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { aiJson, aiConfigured } from "@/lib/claude";
 import { db } from "@/lib/store";
@@ -45,6 +46,7 @@ function nettoyerScenes(brut: unknown[]): Scene[] {
 
 // POST { action: "etat" | "saison" | "script" | "sauver" | "supprimer" | "voix", … }
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const b = (await req.json()) as { action: string; sujet?: string; pitch?: string; episode?: Episode; id?: string; texte?: string; voix?: string };
     const etat = await lire();

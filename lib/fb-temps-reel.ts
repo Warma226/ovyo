@@ -1,11 +1,12 @@
 // Temps réel Facebook : la Page prévient l'app à chaque commentaire ou mention (webhook « feed »).
 // L'app lance aussitôt un passage de VOA (décision et réponse), puis transmet le commentaire sur Telegram.
+import { cle } from "./connexions-espace";
 import { createHash, createHmac, timingSafeEqual } from "crypto";
 import { graph, PAGE, cmPassage, auteursWebhook, commentairesWebhook } from "./cm";
 import { verifierGrin } from "./telegram-bot";
 
-// Jeton de vérification à saisir dans Meta (Webhooks › Page) : dérivé de l'identifiant de la Page, sans secret à créer.
-export const jetonVerification = () => createHash("sha256").update(`tuvoa-fb:${process.env.FB_PAGE_ID ?? ""}`).digest("hex").slice(0, 24);
+// Jeton de vérification à saisir dans l'app Meta « Ovyo » (Webhooks › Page) : FB_VERIFY_TOKEN, choisi par l'administratrice.
+export const jetonVerification = () => process.env.FB_VERIFY_TOKEN || createHash("sha256").update(`ovyo-fb:${process.env.APP_SECRET ?? ""}`).digest("hex").slice(0, 24);
 
 // Signature X-Hub-Signature-256 (HMAC-SHA256 du corps avec la clé secrète de l'app Meta, FB_APP_SECRET).
 // Sans FB_APP_SECRET, l'appel est accepté : il ne fait que réveiller VOA, qui relit tout elle-même chez Facebook.

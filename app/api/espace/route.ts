@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { dbBrut } from "@/lib/store";
 import { espaceCourant } from "@/lib/espace";
@@ -11,6 +12,7 @@ const COULEUR = /^#[0-9a-fA-F]{6}$/;
 
 // GET → l'espace connecté et ses réglages de marque.
 export async function GET() {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const E = espaceCourant();
   if (!E) return NextResponse.json({ error: "Espace inconnu." }, { status: 401 });
   const e = await lireEspace(E);
@@ -20,6 +22,7 @@ export async function GET() {
 
 // PATCH { nom?, type?, logo?, couleur?, profil? } → met à jour l'identité de l'espace (administrateur seulement).
 export async function PATCH(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const E = espaceCourant();
   if (!E) return NextResponse.json({ error: "Espace inconnu." }, { status: 401 });
   const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;

@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { moi } from "@/lib/equipe";
 import { ajouterChaine, ecarter, lister, majChaine, rafraichir, reperer } from "@/lib/youtube";
@@ -7,6 +8,7 @@ export const maxDuration = 300;
 
 // GET : vidéos des chaînes suivies (rafraîchies si la liste est vide ou si ?maj=1).
 export async function GET(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const maj = new URL(req.url).searchParams.get("maj") === "1";
     let r = await lister();
@@ -23,6 +25,7 @@ export async function GET(req: Request) {
 
 // POST { action: "extraits" | "ecarter", id } ou, pour l'administration, { action: "chaine-ajouter" | "chaine-retirer" | "chaine-autoriser", handle, ... }
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const b = (await req.json().catch(() => ({}))) as { action?: string; id?: string; handle?: string; type?: string; autorisee?: boolean };
     if (b.action?.startsWith("chaine-")) {

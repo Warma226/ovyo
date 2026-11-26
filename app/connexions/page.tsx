@@ -1,371 +1,159 @@
 "use client";
-// Connexions : l'état de santé de chaque compte et service (dernière publication réussie, autorisations,
-// expiration du jeton Facebook, quotas, incidents), avec la marche à suivre pour relier ce qui manque.
-import { useVoirPlus } from "@/components/VoirPlus";
+// Connexions : le client relie ses comptes (Facebook et Instagram, alertes Telegram, site WordPress…).
+// Chaque bouton ouvre la page officielle du réseau ; Ovyo ne voit jamais les mots de passe.
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Trait } from "@/components/BottomNav";
-import { taille } from "@/components/Tableau";
-import { PLATFORMS, type Platform } from "@/lib/config";
-import { getInfo, type Info } from "@/lib/client";
+import { useSearchParams } from "next/navigation";
 
-const LETTRE: Record<Platform, string> = { wordpress: "W", facebook: "F", linkedin: "in", tiktok: "T" };
-
-// Les comptes se relient avec des variables d'environnement dans Vercel : « Connecter » affiche la marche à suivre.
-const HELP: Record<Platform, string[]> = {
-  wordpress: [
-    "Dans WordPress : Utilisateurs › Profil › Mots de passe d'application, crée « Ovyo ».",
-    "Dans Vercel (Settings › Environment Variables) : WP_URL, WP_USER et WP_APP_PASSWORD.",
-    "Redéploie l'app (Deployments › Redeploy).",
-  ],
-  facebook: [
-    "Crée une application sur developers.facebook.com et relie votre Page.",
-    "Obtiens un jeton de Page longue durée (pages_manage_posts, pages_read_engagement).",
-    "Dans Vercel : FB_PAGE_ID et FB_PAGE_TOKEN, puis redéploie.",
-  ],
-  linkedin: [
-    "Sur make.com (gratuit), crée un scénario : module « Webhooks › Custom webhook », puis copie son adresse.",
-    "Dans Vercel : LINKEDIN_WEBHOOK_URL = cette adresse, puis redéploie.",
-    "Dans Make, sur le webhook : « Redetermine data structure », puis ici « Envoyer un exemple à Make ».",
-    "Ajoute « HTTP › Get a file » (URL : image_url) puis « LinkedIn › Create an Organization Image Post » (votre Page, texte : text, image : le fichier). Active le scénario.",
-  ],
-  tiktok: [
-    "Sur developers.tiktok.com, crée une application « Ovyo » et ajoute les produits « Login Kit » et « Content Posting API » (avec « Direct Post »).",
-    "Adresse de redirection (Login Kit) : https://ovyo.warmachinertech.workers.dev/api/tiktok/callback. Autorisations : user.info.basic et video.publish.",
-    "Vérifie l'adresse https://ovyo.warmachinertech.workers.dev/ comme préfixe d'URL (Content Posting API › URL properties) : envoie-moi le fichier de vérification, je le mets en ligne.",
-    "Dans Vercel : TIKTOK_CLIENT_KEY et TIKTOK_CLIENT_SECRET (onglet « Credentials » de l'app TikTok), puis redéploie.",
-    "Ouvre https://ovyo.warmachinertech.workers.dev/api/tiktok/login et autorise votre compte TikTok.",
-    "Tant que TikTok n'a pas validé l'app (audit), les publications sont visibles par toi seul. Demande l'audit dans le portail pour publier en public.",
-  ],
+type Etat = {
+  facebook: { nom: string; photo: string | null } | null; facebookEnAttente: boolean;
+  instagram: { nom: string } | null; wordpress: { nom: string } | null; telegram: { nom: string } | null;
+  ouverts: { facebook: boolean; telegram: boolean };
 };
+type PageChoix = { id: string; nom: string; photo: string | null; instagram: string | null };
 
-type Diag = { id: string; label: string; ok: boolean; detail: string };
-type Sante = {
-  dernier: Partial<Record<Platform, string>>;
-  incidents: { plateforme: Platform; at: string; detail: string; titre: string; id: string; resolu: boolean }[];
-  jeton: { expire: string | null; accesDonnees: string | null; autorisations: string[] } | null;
-  diagnostic: Diag[];
-  stockage: { capacite: number; utilise: number; n: number } | null;
-  ia: "claude" | "gemini" | null;
-  voix: boolean;
-  demo?: boolean;
-};
-type Etat = "ok" | "warn" | "off" | "err";
-const ETATS: Record<Etat, [string, string, string, string]> = {
-  ok: ["Opérationnel", "#D9F7E6", "#05603A", "#16A34A"],
-  warn: ["À surveiller", "#FFE8DC", "#9A3412", "#E94A06"],
-  off: ["Non connecté", "#EEF2F8", "#5B6B86", "#9AA8BE"],
-  err: ["En panne", "#FDE3E6", "#9F1239", "#E11D2E"],
-};
-const COULEUR: Record<Platform, string> = { facebook: "#1877F2", linkedin: "#0A66C2", wordpress: "#0A2A66", tiktok: "#0B1A33" };
-const ROLE: Record<Platform, string> = { facebook: "Publications, commentaires, messages", linkedin: "Publication via Make", wordpress: "Articles du site", tiktok: "Vidéos et carrousels" };
-const AUTORISATIONS: [string, string][] = [
-  ["pages_manage_posts", "Publier sur la Page"],
-  ["pages_read_engagement", "Lire les réactions et commentaires"],
-  ["pages_manage_engagement", "Répondre et masquer les commentaires"],
-  ["pages_messaging", "Répondre aux messages privés"],
-  ["pages_read_user_content", "Voir les mentions de la Page"],
-  ["pages_manage_metadata", "Temps réel (alerte à chaque commentaire)"],
-];
-
-function quand(iso?: string | null): string {
-  if (!iso) return "jamais ces 14 derniers jours";
-  const d = new Date(iso);
-  const auj = d.toDateString() === new Date().toDateString();
-  return `${auj ? "aujourd'hui" : d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "short" })}, ${d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
-}
-const jours = (iso: string | null) => (iso ? Math.ceil((new Date(iso).getTime() - Date.now()) / 864e5) : null);
-
-function Puce({ ok, children }: { ok: boolean | null; children: React.ReactNode }) {
-  return (
-    <li className="row" style={{ gap: 10, alignItems: "flex-start", fontSize: 13, lineHeight: 1.4 }}>
-      <span style={{ width: 18, height: 18, borderRadius: 9, flexShrink: 0, marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", background: ok ? "#16A34A" : ok === false ? "#E94A06" : "#C9D3E3" }}>
-        <Trait d={ok ? "M20 6L9 17l-5-5" : "M12 8v5M12 17h.01"} size={11} stroke={3.2} />
-      </span>
-      <span style={{ color: ok === false ? "#9A3412" : "#33425C", fontWeight: ok === false ? 600 : 400 }}>{children}</span>
-    </li>
-  );
+export default function Page() {
+  return <Suspense fallback={null}><Connexions /></Suspense>;
 }
 
-function Carte({ ini, couleur, nom, role, etat, children, actions, extra }: { ini: string; couleur: string; nom: string; role: string; etat: Etat; children: React.ReactNode; actions?: React.ReactNode; extra?: React.ReactNode }) {
-  const e = ETATS[etat];
-  return (
-    <article className="tv-cnx" data-etat={etat}>
-      <div className="row" style={{ gap: 12 }}>
-        <span className="ico" style={{ background: couleur }}>{ini}</span>
-        <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}><strong style={{ fontFamily: "var(--font-mont)", fontSize: 16 }}>{nom}</strong><span className="tv-gris" style={{ fontSize: 12 }}>{role}</span></span>
-        <span className="tv-etat" style={{ background: e[1], color: e[2] }}><i style={{ background: e[3] }} />{e[0]}</span>
-      </div>
-      {extra}
-      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 6 }}>{children}</ul>
-      {actions ? <div className="row" style={{ gap: 8, flexWrap: "wrap", marginTop: "auto" }}>{actions}</div> : null}
-    </article>
-  );
-}
+function Connexions() {
+  const q = useSearchParams();
+  const [etat, setEtat] = useState<Etat | null>(null);
+  const [pages, setPages] = useState<PageChoix[] | null>(null);
+  const [wp, setWp] = useState(false);
+  const [info, setInfo] = useState(q.get("ok") === "facebook" ? "Votre Page Facebook est reliée." : "");
+  const [erreur, setErreur] = useState(q.get("erreur") ?? "");
+  const [busy, setBusy] = useState("");
 
-export default function Connexions() {
-  const [info, setInfo] = useState<Info | null>(null);
-  const [sante, setSante] = useState<Sante | null>(null);
-  const [open, setOpen] = useState<string | null>(null);
-  const [error, setError] = useState("");
-  const [tests, setTests] = useState<Record<string, { ok: boolean; detail: string }> | null>(null);
-  const [testeA, setTesteA] = useState<Date | null>(null);
-  const [testing, setTesting] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [makeMsg, setMakeMsg] = useState("");
-  const [wa, setWa] = useState<boolean | null>(null);
-  const [canal, setCanal] = useState<"telegram" | "whatsapp">("whatsapp");
-  const [cmdes, setCmdes] = useState(false);
-  const [tr, setTr] = useState<{ actif: boolean; url: string; jeton: string; signature: boolean } | null>(null);
-  const [trMsg, setTrMsg] = useState("");
-  useEffect(() => { fetch("/api/facebook/abonner").then((r) => r.json()).then(setTr).catch(() => undefined); }, []);
-  async function activerTempsReel() {
-    setTrMsg("");
-    const r = await fetch("/api/facebook/abonner", { method: "POST" });
-    const d = (await r.json().catch(() => ({}))) as { detail?: string };
-    setTrMsg(r.ok ? (d.detail ?? "Temps réel actif.") : `Échec : ${d.detail ?? r.status}`);
-    if (r.ok) setTr((t) => (t ? { ...t, actif: true } : t));
-  }
-  const [waMsg, setWaMsg] = useState("");
-  const [waEnvoi, setWaEnvoi] = useState(false);
-  useEffect(() => { fetch("/api/whatsapp").then((r) => r.json()).then((d: { canal?: "telegram" | "whatsapp"; relie?: boolean; commandes?: boolean }) => { setCanal(d.canal ?? "whatsapp"); setWa(Boolean(d.relie)); setCmdes(Boolean(d.commandes)); }).catch(() => setWa(false)); }, []);
-  async function testWhatsapp(action?: "relier" | "commandes") {
-    setWaEnvoi(true); setWaMsg("");
-    try {
-      const r = await fetch("/api/whatsapp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action }) });
-      if (action && r.ok) { setWa(true); setCmdes(true); }
-      const d = (await r.json().catch(() => ({}))) as { detail?: string };
-      setWaMsg(r.ok ? (d.detail ?? "Message envoyé.") : `Échec : ${d.detail ?? r.status}`);
-    } catch (e) { setWaMsg(`Échec : ${(e as Error).message}`); } finally { setWaEnvoi(false); }
-  }
-
-  async function sendMakeExample() {
-    setSending(true);
-    setMakeMsg("");
-    try {
-      const res = await fetch("/api/connexions/make-exemple", { method: "POST" });
-      const d = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(d.error || `Envoi impossible (${res.status}).`);
-      setMakeMsg("Exemple envoyé : Make connaît maintenant les champs text, image_url, title…");
-    } catch (e) {
-      setMakeMsg(`Échec : ${(e as Error).message}`);
-    } finally {
-      setSending(false);
-    }
-  }
-
-  async function runTests() {
-    setTesting(true);
-    setError("");
-    try {
-      const [res] = await Promise.all([
-        fetch("/api/connexions", { cache: "no-store" }),
-        fetch("/api/connexions/sante", { cache: "no-store" }).then((r) => r.json()).then((d: Sante) => !d.demo && setSante(d)).catch(() => {}),
-      ]);
-      const d = (await res.json()) as { results?: Record<string, { ok: boolean; detail: string }>; error?: string };
-      if (!res.ok || !d.results) throw new Error(d.error || `Test impossible (${res.status}).`);
-      setTests(d.results);
-      setTesteA(new Date());
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setTesting(false);
-    }
-  }
-
+  const charger = () => fetch("/api/connexions/etat").then((r) => r.json()).then(setEtat).catch(() => setErreur("Chargement impossible."));
+  useEffect(() => { void charger(); }, []);
   useEffect(() => {
-    getInfo().then(setInfo).catch((e: Error) => setError(e.message));
-    fetch("/api/connexions/sante", { cache: "no-store" }).then((r) => r.json()).then((d: Sante) => !d.demo && setSante(d)).catch(() => {});
-  }, []);
+    if (q.get("choix") === "facebook") fetch("/api/connexions/facebook/choix").then((r) => r.json()).then((d) => setPages(d.pages ?? [])).catch(() => {});
+  }, [q]);
 
-  // État de chaque canal
-  const etatCanal = (p: Platform): Etat => {
-    const c = info?.connections[p];
-    if (!c?.configured) return "off";
-    if (tests?.[p] && !tests[p].ok) return "err";
-    const recents = (sante?.incidents ?? []).filter((i) => i.plateforme === p && !i.resolu);
-    if (recents.length) return "warn";
-    if (p === "facebook") {
-      const j = jours(sante?.jeton?.expire ?? null);
-      if ((j !== null && j < 15) || (sante?.diagnostic ?? []).some((d) => !d.ok)) return "warn";
-    }
-    return "ok";
-  };
-  const etats = PLATFORMS.map((p) => etatCanal(p.id));
-  const svcOk = [Boolean(info?.ai), Boolean(sante?.voix), Boolean(info && !info.demo)];
-  const total = etats.length + svcOk.length;
-  const okCount = etats.filter((e) => e === "ok").length + svcOk.filter(Boolean).length;
-
-  const jetonJours = jours(sante?.jeton?.expire ?? null);
-  const vInc = useVoirPlus(sante?.incidents ?? []);
-  const scopes = sante?.jeton?.autorisations ?? [];
-  const manquantes = AUTORISATIONS.filter(([k]) => scopes.length && !scopes.includes(k));
-  const alerte =
-    jetonJours !== null && jetonJours < 15 ? `Le jeton de la Page Facebook expire dans ${jetonJours} jour${jetonJours > 1 ? "s" : ""}. Renouvelez-le dans Vercel (FB_PAGE_TOKEN) avant cette date.`
-    : manquantes.length ? `Une autorisation manque sur la Page Facebook : « ${manquantes[0][1]} ». Sans elle, VOA ne peut pas faire ce travail.`
-    : (sante?.diagnostic ?? []).find((d) => !d.ok)?.detail ?? "";
-
-  const aide = (id: string, lignes: string[]) =>
-    open === id ? <li><ol id={`aide-${id}`} className="tv-aide">{lignes.map((h) => <li key={h}>{h}</li>)}</ol></li> : null;
-  const btnAide = (id: string, configure: boolean) => (
-    <button type="button" className={configure ? "btn small" : "btn small dark"} aria-expanded={open === id} aria-controls={`aide-${id}`} onClick={() => setOpen(open === id ? null : id)}>
-      {configure ? "Changer de compte" : "Relier"}
-    </button>
-  );
+  async function choisir(id: string) {
+    setBusy(id);
+    const r = await fetch("/api/connexions/facebook/choix", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    setBusy(""); setPages(null);
+    if (r.ok) { setInfo("Votre Page Facebook est reliée."); void charger(); } else setErreur((await r.json().catch(() => ({}))).error ?? "Erreur.");
+  }
+  async function retirer(canal: string) {
+    if (!window.confirm("Déconnecter ce compte ? Ovyo ne pourra plus y publier.")) return;
+    setBusy(canal);
+    await fetch("/api/connexions/retirer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ canal }) });
+    setBusy(""); void charger();
+  }
+  async function telegram() {
+    setBusy("telegram"); setErreur("");
+    const r = await fetch("/api/connexions/telegram");
+    const d = await r.json().catch(() => ({}));
+    setBusy("");
+    if (!r.ok) return setErreur(d.error ?? "Telegram indisponible.");
+    window.open(d.lien, "_blank", "noopener");
+    setInfo("Telegram s'est ouvert : appuyez sur « Démarrer ». Revenez ensuite ici et rechargez la page.");
+  }
 
   return (
     <div className="tv-page">
-      <div className="tv-corps" style={{ paddingTop: 20 }}>
-        <div className="tv-entete" style={{ gap: 12 }}>
-          <div style={{ flex: "1 1 340px", display: "flex", flexDirection: "column", gap: 6 }}>
-            <Link href="/" className="tv-gris tv-desk" style={{ textDecoration: "none", fontWeight: 600 }}>← Tableau de bord</Link>
-            <h1 className="tv-titre">Connexions</h1>
-            <span style={{ fontSize: 14, color: "#33425C" }}>L'état de chaque compte et service dont Ovyo a besoin pour publier.</span>
-          </div>
-          <span className="tv-rond" style={{ width: "auto", height: 52, padding: "0 16px", borderRadius: 16, gap: 8, fontSize: 14, cursor: "default" }}>
-            <strong style={{ fontFamily: "var(--font-mont)", fontSize: 20 }}>{info ? `${okCount} / ${total}` : "…"}</strong>
-            opérationnels{testeA ? ` · testé à ${testeA.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : ""}
-          </span>
-          <button type="button" className="tv-btn-nuit" onClick={runTests} disabled={testing}>
-            <Trait d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5" size={16} stroke={2.2} />{testing ? "TEST EN COURS…" : "TOUT TESTER"}
-          </button>
+      <div className="tv-corps" style={{ paddingTop: 20, maxWidth: 880 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
+          <Link href="/compte" className="tv-gris" style={{ textDecoration: "none", fontWeight: 600 }}>← Compte</Link>
+          <h1 className="tv-titre">Vos comptes reliés</h1>
+          <span style={{ fontSize: 15, color: "#33425C" }}>Ovyo publie sur vos comptes et vous prévient. Vous pouvez tout déconnecter à tout moment.</span>
         </div>
+        {info ? <p className="notice vert" role="status">{info}</p> : null}
+        {erreur ? <p className="notice rouge" role="alert">{erreur}</p> : null}
 
-        {error ? <p className="notice rouge" role="alert">{error}</p> : null}
-        {alerte ? (
-          <div className="tv-alerte-cnx" role="status">
-            <Trait d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" size={22} stroke={2} />
-            <span style={{ flex: "1 1 300px" }}>{alerte}</span>
-            <button type="button" className="tv-btn-nuit" style={{ height: 44 }} onClick={() => setOpen("facebook")}>Voir la marche à suivre</button>
-          </div>
+        {pages?.length ? (
+          <section className="cnx-carte" aria-labelledby="t-choix" style={{ borderColor: "#2563EB" }}>
+            <h2 id="t-choix" style={{ margin: 0, fontSize: 18 }}>Quelle Page Ovyo doit-il gérer ?</h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {pages.map((p) => (
+                <button key={p.id} type="button" className="cnx-page" onClick={() => choisir(p.id)} disabled={busy !== ""}>
+                  {p.photo ? <img src={p.photo} alt="" width={40} height={40} style={{ borderRadius: 20 }} /> : <span className="cnx-ico" style={{ background: "#1877F2" }}>f</span>}
+                  <span style={{ flex: 1, textAlign: "left" }}><strong>{p.nom}</strong>{p.instagram ? <small> · Instagram @{p.instagram}</small> : null}</span>
+                  <span style={{ color: "#2563EB", fontWeight: 700 }}>{busy === p.id ? "…" : "Choisir"}</span>
+                </button>
+              ))}
+            </div>
+          </section>
         ) : null}
 
-        <div className="row" style={{ alignItems: "baseline", gap: 10 }}><h2 className="tv-h2" style={{ fontSize: 22 }}>Canaux de publication</h2><span className="tv-gris">là où Ovyo publie pour vous</span></div>
-        <div className="tv-cnx-grille">
-          {PLATFORMS.map((p) => {
-            const c = info?.connections[p.id];
-            const t = tests?.[p.id];
-            return (
-              <Carte
-                key={p.id}
-                ini={LETTRE[p.id]}
-                couleur={COULEUR[p.id]}
-                nom={p.id === "wordpress" ? "Site web" : p.label}
-                role={ROLE[p.id]}
-                etat={info ? etatCanal(p.id) : "off"}
-                extra={p.id === "facebook" && jetonJours !== null ? (
-                  <div className="tv-jeton" data-urgent={jetonJours < 15}>
-                    <strong>{jetonJours} j</strong>
-                    <span>avant l'expiration du jeton de la Page ({new Date(sante?.jeton?.expire as string).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}).</span>
-                  </div>
-                ) : p.id === "facebook" && sante?.jeton && !sante.jeton.expire ? (
-                  <div className="tv-jeton"><strong>∞</strong><span>Jeton de Page sans date d'expiration.</span></div>
-                ) : null}
-                actions={
-                  <>
-                    {btnAide(p.id, Boolean(c?.configured))}
-                    {p.id === "linkedin" && c?.configured && c.detail.includes("Make") ? <button type="button" className="btn small" disabled={sending} onClick={sendMakeExample}>{sending ? "Envoi…" : "Envoyer un exemple à Make"}</button> : null}
-                    {p.id === "tiktok" && c?.configured ? <a className="btn small" href="/api/tiktok/login">Autoriser le compte</a> : null}
-                    {p.id === "facebook" && c?.configured && tr && !tr.actif ? <button type="button" className="btn small" onClick={activerTempsReel}>Activer le temps réel</button> : null}
-                  </>
-                }
-              >
-                {!info ? <Puce ok={null}>…</Puce> : !c?.configured ? (
-                  <Puce ok={null}>Pas encore relié.</Puce>
-                ) : (
-                  <>
-                    <Puce ok={Boolean(sante?.dernier[p.id])}>Dernière publication réussie : {sante ? quand(sante.dernier[p.id]) : "…"}</Puce>
-                    {t ? <Puce ok={t.ok}>{t.detail}</Puce> : <Puce ok={null}>Relié · {c.detail}</Puce>}
-                    {p.id === "facebook" && scopes.length ? AUTORISATIONS.map(([k, l]) => <Puce key={k} ok={scopes.includes(k)}>{l}{scopes.includes(k) ? "" : " : autorisation manquante"}</Puce>) : null}
-                    {p.id === "facebook" && tr ? <Puce ok={tr.actif}>{tr.actif ? "Temps réel : VOA réagit à chaque commentaire en quelques secondes" : "Temps réel pas encore actif (commentaires relevés toutes les 5 min)"}</Puce> : null}
-                    {p.id === "facebook" && tr && !tr.actif ? <Puce ok={null}>Webhook Meta (Page › feed) : URL {tr.url} · jeton de vérification {tr.jeton}</Puce> : null}
-                    {p.id === "facebook" && trMsg ? <Puce ok={!trMsg.startsWith("Échec")}>{trMsg}</Puce> : null}
-                    {(sante?.incidents ?? []).filter((i) => i.plateforme === p.id && !i.resolu).slice(0, 1).map((i) => <Puce key={i.id} ok={false}>Échec non résolu : {i.detail}</Puce>)}
-                  </>
-                )}
-                {makeMsg && p.id === "linkedin" ? <Puce ok={!makeMsg.startsWith("Échec")}>{makeMsg}</Puce> : null}
-                {aide(p.id, c?.configured ? ["Pour changer de compte, remplacez les variables dans Vercel puis redéployez.", ...(p.id === "facebook" ? ["Un nouveau jeton de Page doit avoir les autorisations listées ci-dessus."] : [])] : HELP[p.id])}
-              </Carte>
-            );
-          })}
-        </div>
-
-        <div className="row" style={{ alignItems: "baseline", gap: 10 }}><h2 className="tv-h2" style={{ fontSize: 22 }}>Services</h2><span className="tv-gris">ce qui fait tourner l'app</span></div>
-        <div className="tv-veille">
-          <div className="tv-cnx-grille" style={{ flex: "999 1 600px", minWidth: 0 }}>
-            <Carte ini={canal === "telegram" ? "TG" : "WA"} couleur={canal === "telegram" ? "linear-gradient(145deg, #7DD3FC, #229ED9)" : "linear-gradient(145deg, #4ADE80, #128C7E)"} nom={canal === "telegram" ? "Alertes Telegram" : "Alertes WhatsApp"} role="Brief du soir et problèmes de la plateforme" etat={wa === null ? "off" : wa ? "ok" : canal === "telegram" ? "warn" : "off"}
-              actions={canal === "telegram" && !wa ? <button type="button" className="btn small" disabled={waEnvoi} onClick={() => testWhatsapp("relier")}>{waEnvoi ? "Recherche…" : "Relier mon Telegram"}</button>
-                : wa ? <>
-                  {canal === "telegram" && !cmdes ? <button type="button" className="btn small primary" disabled={waEnvoi} onClick={() => testWhatsapp("commandes")}>Activer les commandes</button> : null}
-                  <button type="button" className="btn small" disabled={waEnvoi} onClick={() => testWhatsapp()}>{waEnvoi ? "Envoi…" : "Envoyer un message test"}</button>
-                </> : btnAide("alertes", false)}>
-              <Puce ok={wa}>{wa ? `Le brief du soir et les alertes arrivent sur ${canal === "telegram" ? "Telegram" : "WhatsApp"}` : canal === "telegram" ? "Bot prêt : écrivez /start à votre bot dans Telegram, puis « Relier mon Telegram »" : "Pas encore relié"}</Puce>
-              {canal === "telegram" && wa ? <Puce ok={cmdes}>{cmdes ? "Commandes actives : /brief, /prochains, /stats, /pause, /reprendre" : "Commandes pas encore activées"}</Puce> : null}
-              <Puce ok={null}>Alertes : chaque commentaire Facebook, publication en échec, post viral, mode crise, bilan du lundi</Puce>
-              <Puce ok={null}>Un même problème n'est signalé qu'une fois toutes les 6 heures</Puce>
-              {waMsg ? <Puce ok={!waMsg.startsWith("Échec")}>{waMsg}</Puce> : null}
-              {aide("alertes", ["Dans Telegram, ouvrez @BotFather, envoyez /newbot, choisissez un nom (ex. Ovyo Alertes) et un identifiant finissant par « bot ». BotFather vous donne un jeton.", "Dans Vercel, ajoutez TELEGRAM_BOT_TOKEN avec ce jeton, puis redéployez. Ouvrez ensuite votre bot, appuyez sur « Démarrer », et cliquez ici sur « Relier mon Telegram »."])}
-            </Carte>
-            <Carte ini="IA" couleur="linear-gradient(145deg, #C4B5FD, #7C3AED)" nom="Rédaction par l'IA" role={info?.aiProvider === "claude" ? "Claude" : "Google Gemini · gratuit"} etat={!info ? "off" : info.ai ? "ok" : "off"}
-              actions={!info?.ai ? btnAide("ia", false) : undefined}>
-              <Puce ok={info ? info.ai : null}>{info?.ai ? "Rédige les posts, les accroches et les réponses de VOA" : "Non configurée : les textes sont préparés sans IA"}</Puce>
-              <Puce ok={null}>Claude prend le relais si une clé ANTHROPIC_API_KEY est ajoutée</Puce>
-              {aide("ia", ["Gratuit : créez une clé sur aistudio.google.com (Get API key), puis ajoutez GEMINI_API_KEY dans Vercel et redéployez.", "Ou payant à l'usage : clé Claude sur platform.claude.com, à ajouter comme ANTHROPIC_API_KEY."])}
-            </Carte>
-            <Carte ini="V" couleur="linear-gradient(145deg, #FCA5A5, #B91C1C)" nom="Voix off" role="Synthèse vocale Gemini" etat={!sante ? "off" : sante.voix ? "ok" : "off"}
-              actions={<Link className="btn small" href="/minute-cyber">Ouvrir La minute cyber</Link>}>
-              {sante && !sante.voix ? <Puce ok={false}>Ajoutez GEMINI_API_KEY dans Vercel pour la voix off</Puce> : null}
-            </Carte>
-            <Carte ini="DB" couleur="linear-gradient(145deg, #5EEAD4, #0E9F8E)" nom="Base de données" role="Supabase" etat={!info ? "off" : info.demo ? "warn" : "ok"}
-              actions={info?.demo ? btnAide("db", false) : <Link className="btn small" href="/mediatheque">Ouvrir la médiathèque</Link>}
-              extra={sante?.stockage ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                  <div className="row" style={{ fontSize: 12 }}><span className="tv-gris" style={{ flex: 1, fontSize: 12 }}>Stockage des fichiers</span><strong>{taille(sante.stockage.utilise)} / {taille(sante.stockage.capacite)}</strong></div>
-                  <span style={{ height: 8, borderRadius: 4, background: "#EDF1F7", display: "flex" }}><span style={{ width: `${Math.max(1, (sante.stockage.utilise / sante.stockage.capacite) * 100)}%`, borderRadius: 4, background: "#0E9F8E" }} /></span>
-                </div>
-              ) : null}>
-              <Puce ok={info ? !info.demo : null}>{info?.demo ? "Mode démo : posts gardés sur ce téléphone" : "Supabase connecté : publications, réglages, journal de VOA"}</Puce>
-              {sante?.stockage ? <Puce ok>{sante.stockage.n} fichiers dans la médiathèque</Puce> : null}
-              {aide("db", ["Créez un projet sur supabase.com et lancez supabase/schema.sql dans SQL Editor.", "Dans Vercel : SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY, puis redéployez."])}
-            </Carte>
-          </div>
-          <aside className="tv-veille-side">
-            <section className="tv-carte-side" aria-labelledby="t-incidents">
-              <h2 id="t-incidents" className="tv-h2" style={{ fontSize: 18 }}>Incidents récents</h2>
-              {sante && sante.incidents.length === 0 ? <span className="tv-gris" style={{ fontSize: 13 }}>Aucun échec de publication ces 14 derniers jours.</span> : null}
-              {!sante ? <span className="tv-gris">…</span> : null}
-              <ol className="tv-fil">
-                {vInc.visibles.map((i) => (
-                  <li key={`${i.id}-${i.plateforme}`}>
-                    <span className="trait" style={{ background: i.resolu ? "#9AA8BE" : "#E11D2E" }} />
-                    <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
-                      <span style={{ fontSize: 11, color: "#5B6B86" }}>{quand(i.at)} · {PLATFORMS.find((x) => x.id === i.plateforme)?.label}</span>
-                      <Link href={`/apercu?id=${i.id}`} style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.35, color: "#0B1A33", textDecoration: "none" }}>{i.detail}</Link>
-                    </span>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: i.resolu ? "#05603A" : "#9F1239", whiteSpace: "nowrap" }}>{i.resolu ? "Résolu" : "À voir"}</span>
-                  </li>
-                ))}
-              </ol>
-              {vInc.bouton}
-            </section>
-            <p className="notice row" style={{ alignItems: "flex-start", gap: 10 }}>
-              <Trait d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01" size={18} />
-              <span>TikTok demande une validation de l'application avant toute publication publique. Comptez quelques jours.</span>
-            </p>
-            <button
-              type="button"
-              className="btn"
-              onClick={async () => {
-                await fetch("/api/logout", { method: "POST" }).catch(() => undefined);
-                window.location.href = "/acces";
-              }}
-            >
-              <Trait d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" size={18} />
-              Se déconnecter
-            </button>
-          </aside>
+        <div className="cnx-liste">
+          <Carte ico="f" couleur="#1877F2" nom="Facebook" role="Publier vos posts, et laisser VOA répondre aux commentaires"
+            relie={etat?.facebook ? etat.facebook.nom : null} photo={etat?.facebook?.photo}
+            action={etat?.facebook
+              ? <button type="button" className="btn small" onClick={() => retirer("facebook")} disabled={busy !== ""}>Déconnecter</button>
+              : etat && !etat.ouverts.facebook ? <span className="cnx-bientot">Ouverture prochaine</span>
+              : <a className="btn primary small" href="/api/connexions/facebook">Connecter Facebook</a>}
+            aide={!etat?.facebook ? "Facebook vous demande de choisir votre Page et d'autoriser Ovyo. Vous devez être administrateur de la Page." : undefined} />
+          <Carte ico="ig" couleur="#E1306C" nom="Instagram" role="Le compte professionnel relié à votre Page Facebook"
+            relie={etat?.instagram?.nom ?? null}
+            action={<span className="cnx-bientot">{etat?.instagram ? "Publication bientôt" : "Se relie avec Facebook"}</span>}
+            aide={etat?.facebook && !etat.instagram ? "Aucun compte Instagram professionnel n'est relié à cette Page. Reliez-le dans les paramètres de la Page Facebook, puis reconnectez Facebook." : undefined} />
+          <Carte ico="tg" couleur="#229ED9" nom="Alertes Telegram" role="Brief du soir, posts à valider, problèmes : directement sur votre téléphone"
+            relie={etat?.telegram?.nom ?? null}
+            action={etat?.telegram
+              ? <button type="button" className="btn small" onClick={() => retirer("telegram")} disabled={busy !== ""}>Déconnecter</button>
+              : etat && !etat.ouverts.telegram ? <span className="cnx-bientot">Ouverture prochaine</span>
+              : <button type="button" className="btn primary small" onClick={telegram} disabled={busy !== ""}>{busy === "telegram" ? "…" : "Recevoir mes alertes"}</button>} />
+          <Carte ico="W" couleur="#21759B" nom="Site WordPress" role="Publier vos articles sur votre site"
+            relie={etat?.wordpress?.nom ?? null}
+            action={etat?.wordpress
+              ? <button type="button" className="btn small" onClick={() => retirer("wordpress")} disabled={busy !== ""}>Déconnecter</button>
+              : <button type="button" className="btn primary small" onClick={() => setWp(!wp)}>{wp ? "Fermer" : "Relier mon site"}</button>}>
+            {wp && !etat?.wordpress ? <FormWordPress fini={() => { setWp(false); setInfo("Votre site est relié."); void charger(); }} /> : null}
+          </Carte>
+          <Carte ico="in" couleur="#0A66C2" nom="LinkedIn" role="Publier sur votre profil ou votre page entreprise" relie={null} action={<span className="cnx-bientot">Bientôt</span>} />
+          <Carte ico="tt" couleur="#111111" nom="TikTok" role="Publier vos vidéos" relie={null} action={<span className="cnx-bientot">Bientôt</span>} />
         </div>
       </div>
     </div>
+  );
+}
+
+function Carte({ ico, couleur, nom, role, relie, photo, action, aide, children }: { ico: string; couleur: string; nom: string; role: string; relie: string | null; photo?: string | null; action: React.ReactNode; aide?: string; children?: React.ReactNode }) {
+  return (
+    <section className="cnx-carte" aria-label={nom}>
+      <div className="cnx-ligne">
+        {photo ? <img src={photo} alt="" width={48} height={48} style={{ borderRadius: 14 }} /> : <span className="cnx-ico" style={{ background: couleur }}>{ico}</span>}
+        <span style={{ flex: "1 1 200px", minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+          <strong style={{ fontSize: 16 }}>{nom}</strong>
+          <span style={{ fontSize: 13, color: "#4B5563" }}>{role}</span>
+          <span className={relie ? "cnx-etat ok" : "cnx-etat"}>{relie ? `Relié · ${relie}` : "Non relié"}</span>
+        </span>
+        {action}
+      </div>
+      {aide ? <p style={{ margin: 0, fontSize: 13, color: "#4B5563" }}>{aide}</p> : null}
+      {children}
+    </section>
+  );
+}
+
+function FormWordPress({ fini }: { fini: () => void }) {
+  const [f, setF] = useState({ url: "", user: "", password: "" });
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  async function envoyer(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setErr("");
+    const r = await fetch("/api/connexions/wordpress", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
+    const d = await r.json().catch(() => ({}));
+    setBusy(false);
+    if (!r.ok) return setErr(d.error ?? "Connexion impossible.");
+    fini();
+  }
+  return (
+    <form onSubmit={envoyer} style={{ display: "flex", flexDirection: "column", gap: 12, paddingTop: 12, borderTop: "1px solid #EEF1F5" }}>
+      <ol style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: "#33425C", lineHeight: 1.6 }}>
+        <li>Dans votre WordPress : <strong>Comptes › Profil</strong> (ou Utilisateurs › Profil).</li>
+        <li>Tout en bas, « Mots de passe d&apos;application » : tapez « Ovyo », puis <strong>Ajouter</strong>.</li>
+        <li>Copiez le mot de passe affiché et collez-le ci-dessous.</li>
+      </ol>
+      <label className="field">Adresse du site<input value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} placeholder="www.monsite.com" /></label>
+      <label className="field">Identifiant WordPress<input value={f.user} onChange={(e) => setF({ ...f, user: e.target.value })} autoComplete="off" /></label>
+      <label className="field">Mot de passe d&apos;application<input value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} autoComplete="off" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx" /></label>
+      {err ? <p className="notice rouge" role="alert">{err}</p> : null}
+      <button type="submit" className="btn primary" disabled={busy} style={{ alignSelf: "flex-start" }}>{busy ? "Vérification…" : "Relier mon site"}</button>
+    </form>
   );
 }

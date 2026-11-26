@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { aiJson, aiConfigured } from "@/lib/claude";
 import { emptyPost, savePost } from "@/lib/store";
@@ -12,6 +13,7 @@ type ElTexte = { id: string; role: string; type: "texte" | "carte"; texte?: stri
 // POST { action: "textes", sujet, elements } → { textes: { id: texte | carte }, legende }
 // POST { action: "creation", images, video?, legende, titre, quand? } → { id } (post « à valider » ou programmé)
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const b = (await req.json()) as { action: string; sujet?: string; elements?: ElTexte[]; images?: string[]; video?: string; legende?: string; titre?: string; quand?: string };
 

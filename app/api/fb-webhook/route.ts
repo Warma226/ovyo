@@ -1,10 +1,12 @@
 import { NextResponse, after } from "next/server";
 import { concerneVoa, jetonVerification, reagir, signatureValide } from "@/lib/fb-temps-reel";
+import { avecEspace } from "@/lib/espace";
+import { chargerConnexions, espaceDePage } from "@/lib/connexions-espace";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-// Vérification du webhook par Meta (une fois, à l'enregistrement de l'URL).
+// Vérification du webhook par Meta (une fois, à l'enregistrement de l'URL dans l'app Meta « Ovyo »).
 export async function GET(req: Request) {
   const q = new URL(req.url).searchParams;
   if (q.get("hub.mode") === "subscribe" && q.get("hub.verify_token") === jetonVerification()) {
@@ -13,15 +15,23 @@ export async function GET(req: Request) {
   return NextResponse.json({ error: "Jeton de vérification incorrect" }, { status: 403 });
 }
 
-// Notification de la Page : nouveau commentaire ou mention. On répond tout de suite à Meta, puis VOA travaille.
+type Entree = { id?: string; changes?: { field?: string; value?: { item?: string; verb?: string; message?: string; from?: unknown } }[] };
+
+// Notification d'une Page reliée : chaque entrée est traitée dans l'espace du client propriétaire de la Page.
 export async function POST(req: Request) {
   const corps = await req.text();
   if (!signatureValide(corps, req.headers.get("x-hub-signature-256"))) return NextResponse.json({ error: "Signature invalide" }, { status: 401 });
-  let payload: Parameters<typeof concerneVoa>[0] = {};
+  let payload: { object?: string; entry?: Entree[] } = {};
   try { payload = JSON.parse(corps); } catch { /* corps illisible */ }
-  const resume = ((payload as { entry?: { changes?: { field?: string; value?: { item?: string; verb?: string; message?: string; from?: unknown } }[] }[] }).entry ?? [])
-    .flatMap((e) => (e.changes ?? []).map((c) => `${c.field}/${c.value?.item ?? "-"}/${c.value?.verb ?? "-"}${c.value?.message ? " +texte" : ""}${c.value?.from ? " +auteur" : ""}`));
-  console.log(`fb-webhook: ${resume.join(", ") || "vide"}`);
-  if (concerneVoa(payload)) after(async () => { try { await reagir(); } catch (e) { console.error("fb temps réel", e); } });
+  const parPage = new Map<string, Entree[]>();
+  for (const e of payload.entry ?? []) if (e.id) parPage.set(e.id, [...(parPage.get(e.id) ?? []), e]);
+  for (const [page, entrees] of parPage) {
+    const espace = await espaceDePage(page);
+    if (!espace) { console.log(`fb-webhook: Page ${page} reliée à aucun espace`); continue; }
+    const morceau = { ...payload, entry: entrees } as Parameters<typeof concerneVoa>[0];
+    const concerne = await avecEspace(espace, async () => { await chargerConnexions(espace); return concerneVoa(morceau); });
+    console.log(`fb-webhook: Page ${page} → espace ${espace.slice(0, 8)} ${concerne ? "(VOA)" : ""}`);
+    if (concerne) after(() => avecEspace(espace, async () => { await chargerConnexions(espace); try { await reagir(); } catch (e) { console.error("fb temps réel", e); } }));
+  }
   return NextResponse.json({ ok: true });
 }

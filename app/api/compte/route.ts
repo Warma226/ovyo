@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/store";
 import { changerMdpMembre, fermerSession, fermerSessions, hacher, lireAdmin, majAdmin, mdpValide, moi, sessionsDe, verifier } from "@/lib/equipe";
@@ -8,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 // GET : mon compte (profil, appareils, mes publications). Ouvert à toute l'équipe.
 export async function GET() {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const m = await moi();
     let profil: { nom: string; contact?: string; created_at?: string };
@@ -33,6 +35,7 @@ export async function GET() {
 
 // POST { action: "nom" | "mdp" | "deconnecter" | "deconnecter-tout", … }
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const m = await moi();
     const b = (await req.json().catch(() => ({}))) as { action?: string; nom?: string; ancien?: string; nouveau?: string; id?: string };

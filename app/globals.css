@@ -1238,3 +1238,14 @@ h1, h2, h3, .section-title, .topbar .title, .tv-h2, .tv-titre, .tv-studio-h2, .t
 .obv-pied{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #E5E7EB}
 .obv-retour{height:48px;padding:0 18px;border-radius:14px;border:1.5px solid #E5E7EB;background:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
 .obv-suite{min-width:220px;margin:0}
+
+/* ─── Ovyo : connexions ─────────────────────────────────────────── */
+.cnx-liste{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.cnx-carte{display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:20px;background:#fff;border:1.5px solid #EEF1F5}
+.cnx-ligne{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.cnx-ico{flex:none;width:48px;height:48px;border-radius:14px;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;text-transform:lowercase}
+.cnx-etat{align-self:flex-start;margin-top:4px;padding:3px 10px;border-radius:999px;background:#F3F4F6;color:#6B7280;font-size:12px;font-weight:700}
+.cnx-etat.ok{background:#ECFDF5;color:#047857}
+.cnx-bientot{padding:8px 12px;border-radius:10px;background:#F3F4F6;color:#6B7280;font-size:13px;font-weight:700}
+.cnx-page{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;border:1.5px solid #E5E7EB;background:#fff;font:inherit;cursor:pointer}
+.cnx-page small{color:#6B7280}

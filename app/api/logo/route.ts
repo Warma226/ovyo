@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 // GET /api/logo?d=thehackernews.com → le logo officiel du média (icône déclarée par son site), en PNG carré.
 // Ordre : apple-touch-icon et icônes déclarées dans la page d'accueil (la plus grande d'abord), puis /apple-touch-icon.png, puis /favicon.ico.
 // Réponse mise en cache 7 jours ; 404 si rien n'est trouvé (l'app affiche alors les initiales).
@@ -49,6 +50,7 @@ async function image(url: string): Promise<{ bytes: Buffer; type: string } | nul
 }
 
 export async function GET(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const d = (new URL(req.url).searchParams.get("d") ?? "").trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
   if (!DOMAINE.test(d) || /^\d+(\.\d+)+$/.test(d)) return new Response("Domaine invalide.", { status: 400 });
 

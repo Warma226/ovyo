@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { storeImage } from "@/lib/storage";
 
@@ -9,6 +10,7 @@ const MAX = 4 * 1024 * 1024; // limite des requêtes Vercel : 4,5 Mo
 
 // POST (formulaire, champ « file ») → { url } de l'image enregistrée
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const form = await req.formData();
     const file = form.get("file");

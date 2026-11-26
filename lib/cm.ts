@@ -3,6 +3,7 @@
 // décide avec l'IA (répondre, aimer, masquer, transmettre à l'équipe, ignorer), agit et note tout dans le journal.
 // En plus : radar à arnaques, mode crise, lien de l'article en commentaire, grin du jeudi (débat + synthèse),
 // piliers du grin (merci aux membres actifs), rapport du soir, annulation d'une action pendant 10 min.
+import { cle } from "./connexions-espace";
 import { alerte, whatsapp, whatsappConfigure } from "./whatsapp";
 import { db, emptyPost, getSettings, saveSettings, savePost } from "./store";
 import { aiJson, aiConfigured } from "./claude";
@@ -53,13 +54,13 @@ export async function cmSauverReglages(patch: Partial<CmReglages>): Promise<CmRe
 
 // ─── Graph API Facebook ──────────────────────────────────────────────
 const V = () => process.env.FB_GRAPH_VERSION || "v21.0";
-export const PAGE = () => process.env.FB_PAGE_ID ?? "";
-export const fbConfigure = () => Boolean(process.env.FB_PAGE_ID && process.env.FB_PAGE_TOKEN);
+export const PAGE = () => cle("FB_PAGE_ID") ?? "";
+export const fbConfigure = () => Boolean(cle("FB_PAGE_ID") && cle("FB_PAGE_TOKEN"));
 
 export async function graph<T>(path: string, params: Record<string, string> = {}, body?: Record<string, unknown>, method?: "DELETE"): Promise<T> {
   const u = new URL(`https://graph.facebook.com/${V()}/${path}`);
   for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
-  u.searchParams.set("access_token", process.env.FB_PAGE_TOKEN ?? "");
+  u.searchParams.set("access_token", cle("FB_PAGE_TOKEN") ?? "");
   const signal = AbortSignal.timeout(15000); // jamais plus de 15 s par appel Facebook
   const init: RequestInit = method
     ? { method, signal }
@@ -795,7 +796,7 @@ export async function cmDebutCrise(motif: string): Promise<CmReglages> {
 // ─── Jeton de la Page : expiration et autorisations (sans jamais renvoyer le jeton) ───
 export async function cmJeton(): Promise<{ expire: string | null; accesDonnees: string | null; autorisations: string[] } | null> {
   if (!fbConfigure()) return null;
-  const t = process.env.FB_PAGE_TOKEN ?? "";
+  const t = cle("FB_PAGE_TOKEN") ?? "";
   const r = await graph<{ data?: { expires_at?: number; data_access_expires_at?: number; scopes?: string[] } }>("debug_token", { input_token: t });
   const d = r.data ?? {};
   const iso = (s?: number) => (s && s > 0 ? new Date(s * 1000).toISOString() : null);

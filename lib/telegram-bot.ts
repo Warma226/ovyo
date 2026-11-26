@@ -19,7 +19,7 @@ const COMMANDES = [
 
 // Branche le bot sur l'app (réception des commandes) et affiche le menu des commandes dans Telegram.
 export async function activerCommandes(): Promise<{ ok: boolean; detail: string }> {
-  if (!process.env.TELEGRAM_BOT_TOKEN) return { ok: false, detail: "Ajoutez TELEGRAM_BOT_TOKEN dans Vercel." };
+  if (!process.env.TELEGRAM_BOT_TOKEN) return { ok: false, detail: "Le robot Telegram d'Ovyo n'est pas encore configuré." };
   const w = await tg("setWebhook", { url: `${APP()}/api/telegram`, secret_token: secretWebhook(), allowed_updates: ["message"], drop_pending_updates: true });
   if (!w.ok) return { ok: false, detail: `Telegram : ${w.description}` };
   await tg("setMyCommands", { commands: COMMANDES, language_code: "fr" });

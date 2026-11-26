@@ -16,7 +16,6 @@ export const tg = (methode: string, corps?: unknown) =>
   }).then((r) => r.json() as Promise<{ ok: boolean; description?: string; result?: unknown }>);
 
 export async function chatTelegram(): Promise<string | null> {
-  if (process.env.TELEGRAM_CHAT_ID) return process.env.TELEGRAM_CHAT_ID;
   const { data } = await db().from("settings").select("data").eq("id", 9).maybeSingle();
   return ((data?.data as { telegramChat?: string } | null)?.telegramChat) ?? null;
 }

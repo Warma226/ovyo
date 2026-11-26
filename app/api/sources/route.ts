@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { discoverSource } from "@/lib/veille";
 
@@ -6,6 +7,7 @@ export const maxDuration = 30;
 
 // POST { url } : cherche le flux RSS du site et renvoie la source prête à enregistrer.
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const { url } = (await req.json().catch(() => ({}))) as { url?: string };
   if (!url?.trim()) return NextResponse.json({ error: "Indique l'adresse du site." }, { status: 400 });
   try {

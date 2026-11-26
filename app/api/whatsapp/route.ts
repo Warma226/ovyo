@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { canalAlertes, relierTelegram, whatsapp } from "@/lib/whatsapp";
 import { activerCommandes, commandesActives } from "@/lib/telegram-bot";
@@ -7,11 +8,13 @@ export const dynamic = "force-dynamic";
 // GET → canal d'alertes (Telegram ou WhatsApp), état et commandes Telegram.
 // POST { action: "relier" } → relie Telegram ; { action: "commandes" } → active les commandes ; sinon message de test.
 export async function GET() {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const c = await canalAlertes();
   return NextResponse.json({ ...c, commandes: c.canal === "telegram" ? await commandesActives() : false });
 }
 
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   const b = (await req.json().catch(() => ({}))) as { action?: string };
   let r: { ok: boolean; detail: string };
   if (b.action === "relier") {

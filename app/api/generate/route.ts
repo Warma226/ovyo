@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { generatePost, rewrite, draftWithoutAI, aiConfigured, type GenerateInput, type RewriteAction } from "@/lib/claude";
 import "@/lib/marque"; // identité du client dans les textes de l'IA
@@ -9,6 +10,7 @@ export const maxDuration = 120;
 // POST { mode: "post", ...GenerateInput }  → textes pour toutes les plateformes
 // POST { mode: "rewrite", action, text, platform } → texte réécrit
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const body = await req.json();
     if (body.mode === "rewrite") {

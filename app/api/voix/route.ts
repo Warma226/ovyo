@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { synthese } from "@/lib/voix";
 import { STYLES, VOIX, type StyleVoix } from "@/lib/voix-liste";
@@ -7,6 +8,7 @@ export const maxDuration = 300;
 
 // POST { texte, voix, style } → { url, duree } : voix off de synthèse (brief du soir, narration du Studio).
 export async function POST(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   try {
     const b = (await req.json().catch(() => ({}))) as { texte?: string; voix?: string; style?: string };
     const texte = (b.texte ?? "").trim().slice(0, 2500);

@@ -1,3 +1,4 @@
+import { chargerConnexions } from "@/lib/connexions-espace";
 import { NextResponse } from "next/server";
 import { db, getSettings, isDemo } from "@/lib/store";
 import { statsStockage } from "@/lib/mediatheque";
@@ -26,6 +27,7 @@ async function voaDuJour() {
 
 // GET /api/tableau → chiffres du tableau de bord (7 derniers jours + 2 jours planifiés).
 export async function GET(req: Request) {
+  await chargerConnexions(); // comptes reliés de l\'espace (Page, site…)
   if (isDemo()) return NextResponse.json({ demo: true });
   try {
     if (new URL(req.url).searchParams.get("leger")) {

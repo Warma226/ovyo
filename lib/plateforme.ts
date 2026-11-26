@@ -2,6 +2,7 @@
 // Côté serveur uniquement : ces fonctions lisent la base sans filtre d'espace.
 import { dbBrut } from "./store";
 import { avecEspace, espaceCourant } from "./espace";
+import { chargerConnexions } from "./connexions-espace";
 
 export type Espace = {
   id: string; nom: string; slug: string; logo: string | null; couleur: string | null;
@@ -60,7 +61,7 @@ export async function parEspace(req: Request, tache: (req: Request) => Promise<R
   const resultats: Record<string, unknown> = {};
   for (const e of espaces) {
     try {
-      const r = await avecEspace(e.id, () => tache(req.clone()));
+      const r = await avecEspace(e.id, async () => { await chargerConnexions(e.id); return tache(req.clone()); });
       resultats[e.slug] = await r.json().catch(() => ({ status: r.status }));
     } catch (err) {
       console.error(`ovyo: espace ${e.slug}`, err);
