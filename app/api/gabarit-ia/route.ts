@@ -31,5 +31,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: `L'IA n'a pas pu répondre : ${(e as Error).message}` }, { status: 502 });
     }
   }
-  return NextResponse.json({ champs, texte, image: gabaritUrl(b.rubrique, champs, await marqueRendu()) });
+  // Aperçu : les champs vides montrent l'exemple du gabarit.
+  const plein = Object.fromEntries(Object.entries(champs).filter(([, v]) => (Array.isArray(v) ? v.some(Boolean) : Boolean(v))));
+  return NextResponse.json({ champs, texte, image: gabaritUrl(b.rubrique, { ...g.exemple, ...plein }, await marqueRendu()) });
 }

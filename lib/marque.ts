@@ -41,7 +41,7 @@ export async function marque(): Promise<Marque> {
   const E = espaceCourant();
   if (!E) return PAR_DEFAUT;
   const c = cache.get(E);
-  if (c && Date.now() - c.at < 60000) return c.m;
+  if (c && Date.now() - c.at < 10000) return c.m; // court : chaque serveur garde sa copie
   const e = await lireEspace(E).catch(() => null);
   const m = e ? construireMarque(e as Parameters<typeof construireMarque>[0]) : PAR_DEFAUT;
   cache.set(E, { at: Date.now(), m });
