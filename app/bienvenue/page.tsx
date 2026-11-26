@@ -194,7 +194,7 @@ function ApercuStyle({ style, e }: { style: Style; e: Etat }) {
   if (style === "sobre") return (
     <span style={{ ...base, background: "#fff", color: "#18181B", padding: 12, border: "1px solid #E4E4E7" }}>
       <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 6, borderBottom: "1px solid #E4E4E7" }}>{logo}<small style={{ fontSize: 7, color: "#71717A" }}>CHIFFRE DU JOUR</small></span>
-      <span style={{ margin: "auto 0", fontSize: 40, fontWeight: 600, color: c, letterSpacing: -2 }}>2 400</span>
+      <span style={{ margin: "auto 0", fontSize: 36, fontWeight: 600, color: c, letterSpacing: -2, whiteSpace: "nowrap" }}>2 400</span>
       <span style={{ fontSize: 9, color: "#3F3F46" }}>Une phrase qui explique ce chiffre.</span>
     </span>
   );
@@ -202,7 +202,7 @@ function ApercuStyle({ style, e }: { style: Style; e: Etat }) {
     <span style={{ ...base, background: "#F1F1F4", padding: 8, gap: 6 }}>
       <span style={{ background: "#fff", borderRadius: 8, padding: "5px 7px", display: "flex", alignItems: "center" }}>{logo}</span>
       <span style={{ flexGrow: 1, background: "#fff", borderRadius: 12, padding: 10, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
-        <span style={{ alignSelf: "flex-start", background: c, color: "#fff", borderRadius: 10, padding: "3px 8px", fontSize: 30, fontWeight: 800, letterSpacing: -1.5 }}>2 400</span>
+        <span style={{ alignSelf: "flex-start", background: c, color: "#fff", borderRadius: 10, padding: "3px 8px", fontSize: 28, fontWeight: 800, letterSpacing: -1.5, whiteSpace: "nowrap" }}>2 400</span>
         <span style={{ fontSize: 9, fontWeight: 700, color: "#111" }}>Une phrase qui explique ce chiffre.</span>
       </span>
     </span>
@@ -210,7 +210,7 @@ function ApercuStyle({ style, e }: { style: Style; e: Etat }) {
   if (style === "energique") return (
     <span style={{ ...base, background: c, color: "#fff" }}>
       <span style={{ background: e.couleur2, padding: "6px 8px", display: "flex", justifyContent: "space-between", alignItems: "center", color: "#fff" }}>{logo}<small style={{ fontSize: 7, fontWeight: 800, background: "#FDE047", color: "#111", padding: "1px 4px" }}>CHIFFRE</small></span>
-      <span style={{ margin: "auto 10px 4px", fontSize: 48, fontWeight: 800, letterSpacing: -2.5, lineHeight: 0.9 }}>2 400</span>
+      <span style={{ margin: "auto 10px 4px", fontSize: 36, fontWeight: 800, letterSpacing: -2, lineHeight: 0.9, whiteSpace: "nowrap" }}>2 400</span>
       <span style={{ margin: "0 10px 12px", fontSize: 9, fontWeight: 800, textTransform: "uppercase" }}>Une phrase qui explique ce chiffre.</span>
     </span>
   );
@@ -218,7 +218,7 @@ function ApercuStyle({ style, e }: { style: Style; e: Etat }) {
     <span style={{ ...base, background: "#F8F7F4", color: "#1C1917", fontFamily: "'Source Serif 4', serif" }}>
       <span style={{ height: 4, background: c }} />
       <span style={{ padding: "8px 0 6px", textAlign: "center", borderBottom: "1px solid #D6D3D1", display: "flex", justifyContent: "center" }}>{logo}</span>
-      <span style={{ margin: "auto", textAlign: "center", display: "flex", flexDirection: "column", gap: 6, padding: "0 10px" }}><span style={{ fontSize: 38, fontWeight: 800, color: c }}>2 400</span><span style={{ fontSize: 9 }}>Une phrase qui explique ce chiffre.</span></span>
+      <span style={{ margin: "auto", textAlign: "center", display: "flex", flexDirection: "column", gap: 6, padding: "0 10px" }}><span style={{ fontSize: 34, fontWeight: 800, color: c, whiteSpace: "nowrap" }}>2 400</span><span style={{ fontSize: 9 }}>Une phrase qui explique ce chiffre.</span></span>
       <span style={{ height: 14, background: "#1C1917" }} />
     </span>
   );
