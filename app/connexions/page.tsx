@@ -4,6 +4,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { IconeReseau, type Reseau } from "@/components/IconesReseaux";
 
 type Etat = {
   facebook: { nom: string; photo: string | null } | null; facebookEnAttente: boolean;
@@ -70,7 +71,7 @@ function Connexions() {
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {pages.map((p) => (
                 <button key={p.id} type="button" className="cnx-page" onClick={() => choisir(p.id)} disabled={busy !== ""}>
-                  {p.photo ? <img src={p.photo} alt="" width={40} height={40} style={{ borderRadius: 20 }} /> : <span className="cnx-ico" style={{ background: "#1877F2" }}>f</span>}
+                  {p.photo ? <img src={p.photo} alt="" width={40} height={40} style={{ borderRadius: 20 }} /> : <IconeReseau reseau="facebook" taille={40} />}
                   <span style={{ flex: 1, textAlign: "left" }}><strong>{p.nom}</strong>{p.instagram ? <small> · Instagram @{p.instagram}</small> : null}</span>
                   <span style={{ color: "#2563EB", fontWeight: 700 }}>{busy === p.id ? "…" : "Choisir"}</span>
                 </button>
@@ -80,43 +81,46 @@ function Connexions() {
         ) : null}
 
         <div className="cnx-liste">
-          <Carte ico="f" couleur="#1877F2" nom="Facebook" role="Publier vos posts, et laisser VOA répondre aux commentaires"
+          <Carte reseau="facebook" nom="Facebook" role="Publier vos posts, et laisser VOA répondre aux commentaires"
             relie={etat?.facebook ? etat.facebook.nom : null} photo={etat?.facebook?.photo}
             action={etat?.facebook
               ? <button type="button" className="btn small" onClick={() => retirer("facebook")} disabled={busy !== ""}>Déconnecter</button>
               : etat && !etat.ouverts.facebook ? <span className="cnx-bientot">Ouverture prochaine</span>
               : <a className="btn primary small" href="/api/connexions/facebook">Connecter Facebook</a>}
             aide={!etat?.facebook ? "Facebook vous demande de choisir votre Page et d'autoriser Ovyo. Vous devez être administrateur de la Page." : undefined} />
-          <Carte ico="ig" couleur="#E1306C" nom="Instagram" role="Le compte professionnel relié à votre Page Facebook"
+          <Carte reseau="instagram" nom="Instagram" role="Le compte professionnel relié à votre Page Facebook"
             relie={etat?.instagram?.nom ?? null}
             action={<span className="cnx-bientot">{etat?.instagram ? "Publication bientôt" : "Se relie avec Facebook"}</span>}
             aide={etat?.facebook && !etat.instagram ? "Aucun compte Instagram professionnel n'est relié à cette Page. Reliez-le dans les paramètres de la Page Facebook, puis reconnectez Facebook." : undefined} />
-          <Carte ico="tg" couleur="#229ED9" nom="Alertes Telegram" role="Brief du soir, posts à valider, problèmes : directement sur votre téléphone"
+          <Carte reseau="telegram" nom="Alertes Telegram" role="Brief du soir, posts à valider, problèmes : directement sur votre téléphone"
             relie={etat?.telegram?.nom ?? null}
             action={etat?.telegram
               ? <button type="button" className="btn small" onClick={() => retirer("telegram")} disabled={busy !== ""}>Déconnecter</button>
               : etat && !etat.ouverts.telegram ? <span className="cnx-bientot">Ouverture prochaine</span>
               : <button type="button" className="btn primary small" onClick={telegram} disabled={busy !== ""}>{busy === "telegram" ? "…" : "Recevoir mes alertes"}</button>} />
-          <Carte ico="W" couleur="#21759B" nom="Site WordPress" role="Publier vos articles sur votre site"
+          <Carte reseau="wordpress" nom="Site WordPress" role="Publier vos articles sur votre site"
             relie={etat?.wordpress?.nom ?? null}
             action={etat?.wordpress
               ? <button type="button" className="btn small" onClick={() => retirer("wordpress")} disabled={busy !== ""}>Déconnecter</button>
               : <button type="button" className="btn primary small" onClick={() => setWp(!wp)}>{wp ? "Fermer" : "Relier mon site"}</button>}>
             {wp && !etat?.wordpress ? <FormWordPress fini={() => { setWp(false); setInfo("Votre site est relié."); void charger(); }} /> : null}
           </Carte>
-          <Carte ico="in" couleur="#0A66C2" nom="LinkedIn" role="Publier sur votre profil ou votre page entreprise" relie={null} action={<span className="cnx-bientot">Bientôt</span>} />
-          <Carte ico="tt" couleur="#111111" nom="TikTok" role="Publier vos vidéos" relie={null} action={<span className="cnx-bientot">Bientôt</span>} />
+          <Carte reseau="linkedin" nom="LinkedIn" role="Publier sur votre profil ou votre page entreprise" relie={null} action={<span className="cnx-bientot">Bientôt</span>} />
+          <Carte reseau="tiktok" nom="TikTok" role="Publier vos vidéos" relie={null} action={<span className="cnx-bientot">Bientôt</span>} />
         </div>
       </div>
     </div>
   );
 }
 
-function Carte({ ico, couleur, nom, role, relie, photo, action, aide, children }: { ico: string; couleur: string; nom: string; role: string; relie: string | null; photo?: string | null; action: React.ReactNode; aide?: string; children?: React.ReactNode }) {
+function Carte({ reseau, nom, role, relie, photo, action, aide, children }: { reseau: Reseau; nom: string; role: string; relie: string | null; photo?: string | null; action: React.ReactNode; aide?: string; children?: React.ReactNode }) {
   return (
     <section className="cnx-carte" aria-label={nom}>
       <div className="cnx-ligne">
-        {photo ? <img src={photo} alt="" width={48} height={48} style={{ borderRadius: 14 }} /> : <span className="cnx-ico" style={{ background: couleur }}>{ico}</span>}
+        <span style={{ position: "relative", flex: "none", display: "inline-flex" }}>
+          <IconeReseau reseau={reseau} />
+          {photo ? <img src={photo} alt="" width={24} height={24} style={{ position: "absolute", right: -6, bottom: -6, borderRadius: 12, border: "2px solid #fff" }} /> : null}
+        </span>
         <span style={{ flex: "1 1 200px", minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
           <strong style={{ fontSize: 16 }}>{nom}</strong>
           <span style={{ fontSize: 13, color: "#4B5563" }}>{role}</span>
