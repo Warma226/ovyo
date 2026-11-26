@@ -1,4 +1,5 @@
 "use client";
+import { nomRubrique } from "@/lib/gabarits";
 // Briques communes des ateliers de création (une page par rubrique, jamais mélangées).
 import { marqueSync } from "./useMarque";
 import Link from "next/link";
@@ -7,12 +8,22 @@ import type { Post } from "@/lib/store";
 import { Trait } from "./BottomNav";
 import { heureFixe } from "@/lib/schedule";
 
-export const RUB: Record<RubriqueId, { nom: string; titre: string; c: [string, string]; d: string; pastille: [string, string] }> = {
+const RUB_BASE: Record<"actu" | "cyberbase" | "portrait" | "citation", { nom: string; titre: string; c: [string, string]; d: string; pastille: [string, string] }> = {
   actu: { nom: "Actualité", titre: "Nouvelle actualité", c: ["#60A5FA", "#1D4ED8"], d: "M4 5h16v14H4zM8 9h8M8 13h5", pastille: ["#DBE7FF", "#1D4ED8"] },
   citation: { nom: "Citation", titre: "Nouvelle citation", c: ["#C4B5FD", "#7C3AED"], d: "M7 7h4v6H5V9a2 2 0 0 1 2-2zM15 7h4v6h-6V9a2 2 0 0 1 2-2zM5 13c0 2 1 3 3 4M13 13c0 2 1 3 3 4", pastille: ["#EDE7FF", "#5B21B6"] },
   cyberbase: { nom: "#CyberBase", titre: "Nouvelle #CyberBase", c: ["#5EEAD4", "#0E9F8E"], d: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z", pastille: ["#D5F5F0", "#0B6B60"] },
   portrait: { nom: "Portrait", titre: "Nouveau portrait", c: ["#FDBA74", "#E94A06"], d: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0", pastille: ["#FFE8DC", "#9A3412"] },
 };
+
+// Rubriques du catalogue Ovyo : même présentation, aux couleurs d'Ovyo.
+type InfoRub = { nom: string; titre: string; c: [string, string]; d: string; pastille: [string, string] };
+export const RUB = new Proxy(RUB_BASE as Record<string, InfoRub>, {
+  get(cible, cle: string) {
+    if (cle in cible) return cible[cle];
+    const nom = nomRubrique(cle);
+    return { nom, titre: nom, c: ["#93C5FD", "#2563EB"], d: "M4 5h16v14H4zM8 9h8M8 13h5", pastille: ["#DBE7FF", "#1D4ED8"] } satisfies InfoRub;
+  },
+}) as Record<string, InfoRub>;
 
 export function Tuile({ rub, taille = 52 }: { rub: RubriqueId; taille?: number }) {
   const r = RUB[rub];

@@ -30,6 +30,8 @@ export type Post = {
     titre: string; texte: string; nom?: string; specialite?: string; photo?: string; image?: string; slides?: string[]; video?: string;
     // WordPress : légende et texte alternatif de l'image à la une, catégories, étiquettes, adresse, images supplémentaires
     marque?: string; site?: string; logo?: string;
+    // Gabarits Ovyo : champs du visuel et identité figée au moment de l'enregistrement
+    champs?: import("./gabarits").Champs; rendu?: import("./gabarit-rendu").MarqueRendu;
     legende?: string; alt?: string; image_secours?: string; wp_categories?: string[]; wp_tags?: string[]; wp_slug?: string; wp_maj?: "categories";
     wp_images?: { url: string; legende: string; alt?: string }[];
   };
@@ -46,7 +48,7 @@ export type Post = {
 export { DEFAULT_SETTINGS, mergeSettings, type Settings } from "./settings";
 import { DEFAULT_SETTINGS, mergeSettings, type Settings } from "./settings";
 import { espaceCourant } from "./espace";
-import { marque, appliquer } from "./marque";
+import { marque, appliquer, marqueRendu } from "./marque";
 
 // Remplace les repères {{MARQUE}}, {{TAG}}… par l'identité du client, et note sa marque sur le visuel.
 async function marquerPost(post: Post): Promise<Post> {
@@ -54,6 +56,7 @@ async function marquerPost(post: Post): Promise<Post> {
   const m = await marque();
   const texts = Object.fromEntries(Object.entries(post.texts ?? {}).map(([k, v]) => [k, typeof v === "string" ? appliquer(v, m) : v])) as Post["texts"];
   const visual = { ...post.visual, marque: m.nom, site: m.site || undefined, logo: m.logo || undefined };
+  if (post.visual?.champs) visual.rendu = await marqueRendu();
   return { ...post, texts, visual };
 }
 

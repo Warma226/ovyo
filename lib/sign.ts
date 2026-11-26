@@ -22,5 +22,5 @@ export function verifyParams(params: URLSearchParams): boolean {
 export function appUrl(): string {
   // Sur Vercel, l'adresse de production est fournie automatiquement : APP_URL devient facultatif.
   const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  return (process.env.APP_URL || (vercel ? `https://${vercel}` : "http://localhost:3000")).replace(/\/$/, "");
+  return (process.env.APP_URL || (vercel ? `https://${vercel}` : process.env.NODE_ENV === "production" ? "https://ovyo.warmachinertech.workers.dev" : "http://localhost:3000")).replace(/\/$/, "");
 }

@@ -67,3 +67,19 @@ export async function serifItalicFonts() {
     return [];
   }
 }
+
+// Police choisie par le client (Google Fonts, licences libres) : graisses 600 et 800 quand elles existent.
+type PFont = { name: string; data: ArrayBuffer; weight: 400 | 600 | 700 | 800; style: "normal" };
+const pCache = new Map<string, PFont[]>();
+export async function policeFonts(famille: string): Promise<PFont[]> {
+  const cle = famille.trim();
+  const c = pCache.get(cle);
+  if (c) return c;
+  const nom = cle.replace(/ /g, "+");
+  const poids = [400, 600, 700, 800] as const;
+  const data = await Promise.all(poids.map((w) => loadFamily(nom, w)));
+  const fonts: PFont[] = [];
+  data.forEach((d, i) => { if (d) fonts.push({ name: cle, data: d, weight: poids[i], style: "normal" }); });
+  if (fonts.length) pCache.set(cle, fonts);
+  return fonts;
+}

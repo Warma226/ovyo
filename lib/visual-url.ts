@@ -2,6 +2,8 @@
 import { signParams, appUrl } from "./sign";
 import type { Post } from "./store";
 import type { VisualFormat } from "./formats";
+import { estOvyo } from "./gabarits";
+import { gabaritUrl } from "./gabarit-url";
 
 export function visualUrl(post: Pick<Post, "rubrique" | "visual" | "source_name">, format: VisualFormat, absolute = false): string {
   const p = new URLSearchParams();
@@ -30,6 +32,8 @@ export function generatedRubrique(rubrique: string): boolean {
 }
 
 export function imageFor(post: Pick<Post, "rubrique" | "visual" | "source_name">, platform: string, absolute = false): string {
+  // Gabarit Ovyo : visuel généré à partir des champs, aux couleurs du client (sauf visuel fourni).
+  if (post.visual.champs && post.visual.rendu && !post.visual.image && estOvyo(post.rubrique)) return gabaritUrl(post.rubrique, post.visual.champs, post.visual.rendu, absolute);
   if ((post.rubrique === "citation" || post.rubrique === "cyberbase") && !post.visual.image) return visualUrl(post, formatFor(platform, post.rubrique), absolute);
   return post.visual.image ?? "";
 }

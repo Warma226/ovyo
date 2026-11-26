@@ -10,6 +10,9 @@ import type { RubriqueId } from "@/lib/config";
 import type { Post } from "@/lib/store";
 import { listPosts } from "@/lib/client";
 import { joursManquants } from "@/lib/schedule";
+import { useMarque } from "@/components/useMarque";
+import { GABARITS, nomRubrique } from "@/lib/gabarits";
+import { RUBRIQUES_OVYO } from "@/lib/catalogue";
 
 const DESC: Record<RubriqueId, [string, string]> = {
   actu: ["Une info tech de la veille ou votre idée, résumée en français, montants en FCFA.", "Pilote auto · 6 h – 20 h"],
@@ -28,6 +31,7 @@ export default function Page() {
 
 function Choix() {
   const router = useRouter();
+  const marque = useMarque();
   const q = useSearchParams();
   const [posts, setPosts] = useState<Post[] | null>(null);
 
@@ -80,7 +84,7 @@ function Choix() {
         </div>
 
         <div className="tv-hub">
-          {(Object.keys(RUB) as RubriqueId[]).filter((r) => r !== "portrait").map((r) => {
+          {(["actu"] as RubriqueId[]).map((r) => {
             const [txt, c] = etat(r);
             return (
               <Link key={r} href={`/creer/${r}`} className="tv-hub-carte">
@@ -99,11 +103,31 @@ function Choix() {
           })}
         </div>
 
+        <h2 className="tv-h2" style={{ marginTop: 28 }}>Vos rubriques</h2>
+        <div className="tv-hub" style={{ marginTop: 12 }}>
+          {(marque.rubriques ?? []).filter((id) => GABARITS[id]).map((id) => {
+            const info = RUBRIQUES_OVYO.find((x) => x.id === id);
+            return (
+              <Link key={id} href={`/creer/modele/${id}`} className="tv-hub-carte">
+                <Tuile rub={id} taille={72} />
+                <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+                  <strong style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>{nomRubrique(id)}</strong>
+                  <span style={{ fontSize: 15, lineHeight: 1.5, color: "#33425C" }}>{info?.description}</span>
+                  <span className="row" style={{ flexWrap: "wrap", gap: 8, fontSize: 13 }}><span className="tv-pill">{info?.rythme}{info?.auto ? " · automatique" : ""}</span>{info?.jeu ? <span className="tv-pill">Jeu</span> : null}</span>
+                </span>
+              </Link>
+            );
+          })}
+          <Link href="/compte" className="tv-hub-carte" style={{ borderStyle: "dashed" }}>
+            <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}><strong style={{ fontSize: 18 }}>Ajouter ou retirer des rubriques</strong><span className="tv-gris" style={{ fontSize: 14 }}>Dans Compte › Mon espace</span></span>
+          </Link>
+        </div>
+
         <div className="tv-bas">
           <section aria-labelledby="t-autres" style={{ flex: "999 1 520px", minWidth: 0, display: "flex", flexDirection: "column", gap: 12 }}>
             <h2 id="t-autres" className="tv-h2">Les autres ateliers</h2>
             <div className="row" style={{ flexWrap: "wrap", gap: 12, alignItems: "stretch" }}>
-              {([["/minute-cyber", "La minute cyber", "Vidéo d'une minute : script, voix, montage", NAV_ICONS.minute], ["/studio", "Studio", "Visuels libres, carrousels, vidéos", NAV_ICONS.studio], ["/calendrier", "Récap du vendredi", "Préparé tout seul chaque vendredi", NAV_ICONS.cal]] as const).map(([href, nom, d, ic]) => (
+              {([["/calendrier", "Récap du vendredi", "Préparé tout seul chaque vendredi", NAV_ICONS.cal]] as const).map(([href, nom, d, ic]) => (
                 <Link key={href} href={href} className="tv-atelier-lien">
                   <span className="ico"><Trait d={ic} size={20} /></span>
                   <span style={{ display: "flex", flexDirection: "column", gap: 2 }}><strong style={{ fontSize: 15 }}>{nom}</strong><span className="tv-gris" style={{ fontSize: 13 }}>{d}</span></span>

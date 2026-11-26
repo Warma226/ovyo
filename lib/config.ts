@@ -9,7 +9,8 @@ export const PLATFORMS: { id: Platform; label: string; limit: number }[] = [
   { id: "wordpress", label: "WordPress", limit: 100000 },
 ];
 
-export type RubriqueId = "actu" | "cyberbase" | "portrait" | "citation";
+// Rubriques historiques (actu, cyberbase, portrait, citation) + celles du catalogue Ovyo (lib/catalogue.ts).
+export type RubriqueId = "actu" | "cyberbase" | "portrait" | "citation" | (string & {});
 // `heure` : rubrique publiée chaque jour à heure fixe (heure locale du téléphone).
 export const RUBRIQUES: { id: RubriqueId; label: string; hashtag: string; description: string; alwaysManual: boolean; heure?: number }[] = [
   { id: "actu", label: "Actualité tech", hashtag: "#ActuTech", description: "Les infos du moment, résumées et sourcées.", alwaysManual: false },

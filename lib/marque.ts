@@ -6,7 +6,7 @@ import { lireEspace } from "./plateforme";
 import { crochetsIA } from "./claude";
 
 export type Profil = { description?: string; site?: string; pays?: string; ville?: string; mission?: string; ligne?: string; secteur?: string; ton?: string; style?: string; police?: string; couleur2?: string; rubriques?: string[] };
-export type Marque = { nom: string; tag: string; site: string; pays: string; identite: string; mission: string; ligne: string; logo: string | null; couleur: string };
+export type Marque = { nom: string; tag: string; site: string; pays: string; identite: string; mission: string; ligne: string; logo: string | null; couleur: string; couleur2: string; police: string; style: "sobre" | "moderne" | "energique" | "institutionnel"; rubriques: string[] };
 
 const TYPES: Record<string, string> = { media: "média", entreprise: "entreprise", agence: "agence de communication", institution: "institution" };
 const TON: Record<string, string> = { formel: "formel, vouvoiement, phrases posées", chaleureux: "chaleureux, proche et simple", dynamique: "vif, accrocheur, une pointe d'humour" };
@@ -28,6 +28,10 @@ export function construireMarque(e: { nom: string; type?: string | null; logo?: 
     ligne: p.ligne || "l'actualité de son secteur, expliquée simplement et ancrée dans les réalités locales de son public",
     logo: e.logo ?? null,
     couleur: e.couleur || "#2563EB",
+    couleur2: p.couleur2 || "#111827",
+    police: p.police || "Plus Jakarta Sans",
+    style: (["sobre", "moderne", "energique", "institutionnel"].includes(p.style ?? "") ? p.style : "moderne") as Marque["style"],
+    rubriques: Array.isArray(p.rubriques) ? p.rubriques : [],
   };
 }
 
@@ -56,6 +60,12 @@ export function appliquer(texte: string, m: Marque): string {
     .replaceAll("{{MISSION}}", m.mission ? `Mission : « ${m.mission} »` : "")
     .replaceAll("{{SITE}}", m.site || m.nom);
 }
+// Identité visuelle pour les gabarits (style, police, couleurs) de l'espace courant.
+export async function marqueRendu(): Promise<import("./gabarit-rendu").MarqueRendu> {
+  const m = await marque();
+  return { nom: m.nom, logo: m.logo ?? undefined, site: m.site || undefined, couleur: m.couleur, couleur2: m.couleur2, police: m.police, style: m.style };
+}
+
 export async function avecMarque(texte: string): Promise<string> {
   return texte.includes("{{") ? appliquer(texte, await marque()) : texte;
 }

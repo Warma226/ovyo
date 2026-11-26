@@ -1,5 +1,8 @@
 "use client";
 // Accueil (design v3) : ce qui attend une action, le prochain post, la journée en frise, créer, la veille et VOA.
+import { useMarque } from "@/components/useMarque";
+import { GABARITS, nomRubrique, type Famille } from "@/lib/gabarits";
+import { RUBRIQUES_OVYO } from "@/lib/catalogue";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { NAV_ICONS, Trait } from "@/components/BottomNav";
@@ -36,7 +39,9 @@ const I = {
   play: "M8 5l11 7-11 7z",
   film: "M4 5h16v14H4zM10 9l5 3-5 3z",
 };
-const NOM: Record<string, string> = { actu: "Actualité", citation: "Citation", cyberbase: "#CyberBase", portrait: "Portrait" };
+const NOM: Record<string, string> = { actu: "Actualité", cyberbase: "#CyberBase", portrait: "Portrait" };
+const ICO_FAMILLE: Record<Famille, string> = { chiffre: "M4 19V9M10 19V5M16 19v-7M22 19H2", liste: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01", titre: "M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5", question: "M9 9a3 3 0 1 1 4 2.8c-.7.3-1 .9-1 1.7V15M12 18h.01", citation: "M7 7h4v4c0 3-1.5 5-4 6M14 7h4v4c0 3-1.5 5-4 6", alerte: "M12 3l10 18H2zM12 10v5M12 18h.01", vraifaux: "M20 6L9 17l-5-5" };
+const nomRub = (id: string) => NOM[id] ?? nomRubrique(id);
 const CANAL: Record<string, string> = { facebook: "Facebook", linkedin: "LinkedIn", tiktok: "TikTok", wordpress: "Site" };
 const n = (x?: number) => x ?? 0;
 const quand = (p: Post) => new Date(p.scheduled_at ?? p.created_at);
@@ -64,6 +69,7 @@ export default function Accueil() {
   const [error, setError] = useState("");
   const [visuels, setVisuels] = useState<Record<string, string>>({});
   const moi = useMoi();
+  const marque = useMarque();
   const admin = !moi || moi.role === "admin";
 
   useEffect(() => {
@@ -160,7 +166,7 @@ export default function Accueil() {
               {apercu(prochain) ? <img src={apercu(prochain)} alt="" style={{ objectFit: "contain", objectPosition: "100% 50%" }} /> : null}
               <div>
                 <span className="row" style={{ gap: 8, fontSize: 14 }}>
-                  <span style={{ padding: "3px 9px", borderRadius: 8, background: "rgba(255,255,255,0.16)", fontSize: 12, fontWeight: 700 }}>{NOM[prochain.rubrique] ?? "Post"}</span>
+                  <span style={{ padding: "3px 9px", borderRadius: 8, background: "rgba(255,255,255,0.16)", fontSize: 12, fontWeight: 700 }}>{nomRub(prochain.rubrique)}</span>
                   Prochain post à {hm(quand(prochain))}
                 </span>
                 <strong style={{ fontSize: 23, lineHeight: 1.2, letterSpacing: "-0.4px", marginTop: 10, maxWidth: 520, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{prochain.title || prochain.visual?.titre || "Post sans titre"}</strong>
@@ -190,7 +196,7 @@ export default function Accueil() {
                 <div className="v3-frise">
                   {duJour.slice(0, 10).map((p) => {
                     const cls = p.status === "publie" ? "fait" : p.status === "erreur" ? "erreur" : p.id === prochain?.id ? "prochain" : "";
-                    return <span key={p.id} title={`${hm(quand(p))} · ${NOM[p.rubrique] ?? ""} · ${p.title}`}><i className={cls} /><b style={{ fontWeight: cls === "prochain" ? 800 : 500 }}>{String(quand(p).getHours())}h{quand(p).getMinutes() ? String(quand(p).getMinutes()).padStart(2, "0") : ""}</b></span>;
+                    return <span key={p.id} title={`${hm(quand(p))} · ${nomRub(p.rubrique)} · ${p.title}`}><i className={cls} /><b style={{ fontWeight: cls === "prochain" ? 800 : 500 }}>{String(quand(p).getHours())}h{quand(p).getMinutes() ? String(quand(p).getMinutes()).padStart(2, "0") : ""}</b></span>;
                   })}
                 </div>
                 <div className="row" style={{ flexWrap: "wrap", gap: 14, marginTop: 12, fontSize: 12, color: "#4B5563" }}>
@@ -207,8 +213,8 @@ export default function Accueil() {
                     <div className="vis" style={{ background: p.rubrique === "citation" ? "#E94A06" : p.rubrique === "cyberbase" ? "#1E3A8A" : "#E5E7EB" }}>
                       {p.rubrique === "citation" && !apercu(p)
                         ? <span style={{ display: "flex", height: "100%", padding: "16px", alignItems: "center", color: "#fff", fontSize: 15, fontWeight: 700, lineHeight: 1.3 }}>« {(p.visual?.texte || p.title).slice(0, 90)}{(p.visual?.texte || p.title).length > 90 ? "…" : ""} »</span>
-                        : apercu(p) ? <img src={apercu(p)} alt="" /> : <span style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, padding: 16, textAlign: "center" }}>{p.visual?.titre || NOM[p.rubrique]}</span>}
-                      <span className="v3-chip white" style={{ position: "absolute", top: 10, left: 10 }}>{p.status === "a_valider" ? "À valider" : NOM[p.rubrique] ?? "Post"}</span>
+                        : apercu(p) ? <img src={apercu(p)} alt="" /> : <span style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, padding: 16, textAlign: "center" }}>{p.visual?.titre || nomRub(p.rubrique)}</span>}
+                      <span className="v3-chip white" style={{ position: "absolute", top: 10, left: 10 }}>{p.status === "a_valider" ? "À valider" : nomRub(p.rubrique)}</span>
                     </div>
                     <div style={{ padding: "12px 14px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
                       <strong style={{ fontSize: 15, lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.title || p.visual?.titre}</strong>
@@ -232,14 +238,12 @@ export default function Accueil() {
             <div className="grid2" style={{ gap: 10 }}>
               {[
                 { id: "actu", ico: I.news, info: n(R.actu.a_valider) ? `${R.actu.a_valider} à valider` : "Depuis la veille ou un lien" },
-                { id: "citation", ico: I.quote, info: "Auto à 9 h, 13 h, 17 h" },
-                { id: "cyberbase", ico: I.shield, info: "Auto chaque jour à 7 h" },
-                { id: "videos", ico: I.film, info: "Reels d’une minute" },
+                ...(marque.rubriques ?? []).filter((id) => GABARITS[id]).slice(0, 3).map((id) => ({ id, ico: ICO_FAMILLE[GABARITS[id].famille] ?? I.news, info: RUBRIQUES_OVYO.find((x) => x.id === id)?.rythme ?? "" })),
               ].map((r) => (
-                <Link key={r.id} href={r.id === "videos" ? "/videos" : `/creer/${r.id}`} className="v3-tile">
+                <Link key={r.id} href={r.id === "actu" ? "/creer/actu" : `/creer/modele/${r.id}`} className="v3-tile">
                   <span className="v3-ico"><Trait d={r.ico} size={22} /></span>
                   <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    <strong style={{ fontSize: 15 }}>{NOM[r.id] ?? "Vidéo choc"}</strong>
+                    <strong style={{ fontSize: 15 }}>{nomRub(r.id)}</strong>
                     <span style={{ fontSize: 12, color: "#4B5563" }}>{r.info}</span>
                   </span>
                 </Link>

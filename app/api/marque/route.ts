@@ -10,7 +10,7 @@ export async function GET() {
   const m = await marque();
   const e = espaceCourant() ? await lireEspace(espaceCourant() as string) : null;
   return NextResponse.json({
-    nom: m.nom, tag: m.tag, site: m.site, logo: m.logo, couleur: m.couleur,
+    nom: m.nom, tag: m.tag, site: m.site, logo: m.logo, couleur: m.couleur, rubriques: m.rubriques, type: e?.type ?? null,
     statut: e?.statut ?? null, essai_fin: e?.essai_fin ?? null,
     configure: Boolean((e?.profil as { configure?: boolean } | null)?.configure),
   });

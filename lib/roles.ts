@@ -44,7 +44,7 @@ export function pageAutorisee(role: Role, path: string): boolean {
 const API: [string, Zone | null, Zone | null][] = [
   ["/api/compte", null, null], ["/api/espace", null, "admin"], ["/api/logout", null, null], ["/api/logo", null, null],
   ["/api/settings", null, "admin"], ["/api/whatsapp", null, "admin"], ["/api/facebook/abonner", "admin", "admin"], ["/api/tableau", null, "admin"], ["/api/posts", null, "publier"],
-  ["/api/veille", "veille", "veille"], ["/api/videos", "veille", "veille"], ["/api/generate", "creer", "creer"],
+  ["/api/veille", "veille", "veille"], ["/api/videos", "veille", "veille"], ["/api/generate", "creer", "creer"], ["/api/gabarit-ia", "creer", "creer"],
   ["/api/upload", null, "publier"], ["/api/upload-url", null, "publier"],
   ["/api/studio", "studio", "studio"], ["/api/minute", "studio", "studio"], ["/api/voix", "studio", "studio"],
   ["/api/cm", "grin", "grin"],
