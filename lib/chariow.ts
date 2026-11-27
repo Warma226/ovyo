@@ -2,14 +2,17 @@
 // Côté serveur uniquement. Clés de la plateforme (secrets Cloudflare) :
 //   CHARIOW_API_KEY        clé API (sk_live_…) pour ouvrir une page de paiement
 //   CHARIOW_PULSE_SECRET   secret de signature du Pulse (whsec_…) pour vérifier les avis de paiement
-//   CHARIOW_PRODUIT_ESSENTIEL / _PRO / _AGENCE   identifiant (prd_…) ou slug du produit Chariow de chaque formule
+//   CHARIOW_PRODUIT_ESSENTIEL / _PRO / _AGENCE   (facultatif) remplace l'identifiant du produit Chariow de chaque formule
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { FormuleId } from "./formules";
 
 const API = "https://api.chariow.com/v1";
 
+// Produits de la boutique Chariow (otbbljjy.mychariow.shop).
+const PRODUITS: Partial<Record<FormuleId, string>> = { essentiel: "prd_g9axfd8o", pro: "prd_iz51l1xm" };
+
 export function produitDe(f: FormuleId): string | undefined {
-  return process.env[`CHARIOW_PRODUIT_${f.toUpperCase()}`]?.trim() || undefined;
+  return process.env[`CHARIOW_PRODUIT_${f.toUpperCase()}`]?.trim() || PRODUITS[f];
 }
 export function formuleDuProduit(produit: { id?: string; url?: string } | undefined): FormuleId | undefined {
   if (!produit) return undefined;
