@@ -81,7 +81,7 @@ export function BottomNav() {
   useEffect(() => {
     if (marque.configure === false && marque.statut && moi?.role === "admin" && !path.startsWith("/bienvenue")) window.location.replace("/bienvenue");
   }, [marque.configure, marque.statut, moi?.role, path]);
-  if (path.startsWith("/acces") || path.startsWith("/invitation") || path.startsWith("/inscription") || path.startsWith("/bienvenue")) return null;
+  if (path.startsWith("/acces") || path.startsWith("/invitation") || path.startsWith("/inscription") || path.startsWith("/bienvenue") || path.startsWith("/cgu") || path.startsWith("/confidentialite")) return null;
   const actif = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
   const secondaire = SECONDAIRES.some((p) => path.startsWith(p));
   const media = actif("/mediatheque");

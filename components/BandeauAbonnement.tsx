@@ -9,7 +9,7 @@ export function BandeauAbonnement() {
   const path = usePathname();
   const m = useMarque();
   const moi = useMoi();
-  if (moi?.role !== "admin" || !m.statut || /^\/(acces|inscription|invitation|bienvenue|abonnement)/.test(path)) return null;
+  if (moi?.role !== "admin" || !m.statut || /^\/(acces|inscription|invitation|bienvenue|abonnement|cgu|confidentialite)/.test(path)) return null;
   const fin = m.statut === "actif" ? m.abonnement_fin : m.essai_fin;
   const jours = fin ? Math.ceil((new Date(fin).getTime() - Date.now()) / 864e5) : null;
   let texte = "";
