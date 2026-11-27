@@ -7,8 +7,8 @@ import { apiAutorisee, pageAutorisee } from "@/lib/roles";
 
 // Le middleware passe partout (sauf fichiers statiques) : même sur les pages publiques, il efface les en-têtes
 // x-ovyo-* envoyés par le navigateur, pour qu'on ne puisse jamais se faire passer pour un autre espace client.
-export const config = { matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|ovyo-logo.svg).*)"] };
-const PUBLIC = /^\/(api\/gabarit$|api\/cron|api\/cm-cron|api\/telegram|api\/fb-webhook|api\/chariow$|api\/visuel|api\/login|api\/vitrine|api\/invitation|invitation|inscription|api\/inscription|studio\/|recap\/|cyberbase\/|citations\/|wp\/|api\/wp-categories|api\/media|cgu|confidentialite|tiktok)/;
+export const config = { matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|ovyo-logo.svg|accueil-marque.jpg).*)"] };
+const PUBLIC = /^\/(api\/gabarit$|api\/cron|api\/cm-cron|api\/telegram|api\/fb-webhook|api\/chariow$|api\/visuel|api\/login|api\/vitrine|api\/invitation|invitation|inscription|api\/inscription|studio\/|recap\/|cyberbase\/|citations\/|wp\/|api\/wp-categories|api\/media|cgu|confidentialite|decouvrir|tiktok)/;
 const ENTETES = ["x-ovyo-uid", "x-ovyo-role", "x-ovyo-sid", "x-ovyo-espace"];
 
 // Sessions encore ouvertes (déconnexion d'un appareil, membre suspendu ou retiré) : vérifié en base, gardé 60 s.
@@ -42,6 +42,8 @@ export async function middleware(req: NextRequest) {
   if (s?.sid && !(await sessionOuverte(s.sid, s.espace))) s = null;
   if (pathname === "/acces") return s ? NextResponse.redirect(new URL("/", req.url)) : NextResponse.next();
   if (!s) {
+    // Visiteur sans session sur l'adresse principale : la page d'accueil publique.
+    if (pathname === "/") return NextResponse.rewrite(new URL("/decouvrir", req.url), { request: { headers: h } });
     if (pathname.startsWith("/api/")) return NextResponse.json({ error: "Session expirée : recharge la page et reconnecte-toi." }, { status: 401 });
     const url = new URL("/acces", req.url);
     if (pathname !== "/") url.searchParams.set("next", pathname + search);
