@@ -1,7 +1,6 @@
 "use client";
-// Abonnement : formule en cours, choix d'une formule et paiement Mobile Money / carte via Chariow.
+// Abonnement : choisir une formule, saisir le numéro qui paie, et c'est parti (paiement Mobile Money ou carte via Chariow).
 import { Suspense, useEffect, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FORMULES, formuleDe, prixTexte, type FormuleId } from "@/lib/formules";
 
@@ -12,11 +11,11 @@ type Etat = {
   paiements: { formule: string; montant: number | null; devise: string | null; fin: string | null; created_at: string }[];
 };
 
-const PAYS: [string, string][] = [
-  ["BF", "Burkina Faso"], ["CI", "Côte d'Ivoire"], ["SN", "Sénégal"], ["ML", "Mali"], ["BJ", "Bénin"], ["TG", "Togo"],
-  ["NE", "Niger"], ["GN", "Guinée"], ["CM", "Cameroun"], ["GA", "Gabon"], ["CG", "Congo"], ["CD", "RD Congo"], ["FR", "France"],
+const PAYS: [string, string, string][] = [
+  ["BF", "+226", "Burkina Faso"], ["CI", "+225", "Côte d'Ivoire"], ["SN", "+221", "Sénégal"], ["ML", "+223", "Mali"], ["BJ", "+229", "Bénin"],
+  ["TG", "+228", "Togo"], ["NE", "+227", "Niger"], ["GN", "+224", "Guinée"], ["CM", "+237", "Cameroun"], ["FR", "+33", "France"],
 ];
-const jour = (s: string | null) => (s ? new Date(s).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "");
+const jour = (s: string | null) => (s ? new Date(s).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "");
 const reste = (s: string | null) => (s ? Math.ceil((new Date(s).getTime() - Date.now()) / 864e5) : 0);
 
 export default function Page() {
@@ -26,126 +25,102 @@ export default function Page() {
 function Abonnement() {
   const q = useSearchParams();
   const [etat, setEtat] = useState<Etat | null>(null);
-  const [choix, setChoix] = useState<FormuleId | null>(null);
+  const [choix, setChoix] = useState<FormuleId>("pro");
+  const [pays, setPays] = useState("BF");
+  const [tel, setTel] = useState("");
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
   const [erreur, setErreur] = useState("");
 
   useEffect(() => {
-    fetch("/api/abonnement", { cache: "no-store" }).then((r) => r.json()).then((d) => (d.error ? setErreur(d.error) : setEtat(d))).catch(() => setErreur("Chargement impossible."));
+    fetch("/api/abonnement", { cache: "no-store" }).then((r) => r.json()).then((d: Etat & { error?: string }) => {
+      if (d.error) return setErreur(d.error);
+      setEtat(d);
+      const c = d.acheteur.contact || "";
+      if (c.includes("@")) setEmail(c); else setTel(c.replace(/\D/g, "").replace(/^(00)?226/, ""));
+      if (d.statut === "actif" && (d.formule === "essentiel" || d.formule === "pro")) setChoix(d.formule);
+    }).catch(() => setErreur("Chargement impossible."));
   }, []);
 
-  const f = formuleDe(etat?.formule);
+  const f = formuleDe(choix)!;
   const fin = etat?.statut === "actif" ? etat.abonnement_fin : etat?.essai_fin ?? null;
   const jours = reste(fin);
-
-  return (
-    <div className="tv-page">
-      <div className="tv-corps" style={{ paddingTop: 20, maxWidth: 980 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
-          <Link href="/compte" className="tv-gris" style={{ textDecoration: "none", fontWeight: 600 }}>← Compte</Link>
-          <h1 className="tv-titre">Abonnement</h1>
-          <span style={{ fontSize: 15, color: "#33425C" }}>Payez par Orange Money, Moov Money, Wave ou carte bancaire. Sans engagement : vous payez pour 30 jours à la fois.</span>
-        </div>
-
-        {q.get("retour") ? <p className="notice vert" role="status">Merci ! Dès que Chariow confirme le paiement (en général moins d&apos;une minute), votre abonnement s&apos;active. Rechargez la page si besoin.</p> : null}
-        {erreur ? <p className="notice rouge" role="alert">{erreur}</p> : null}
-
-        {etat ? (
-          <section className="tv-carte" aria-label="Votre situation" style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 16, marginBottom: 20, borderColor: etat.ouvert ? undefined : "#E94A06" }}>
-            <span style={{ flex: "1 1 260px", display: "flex", flexDirection: "column", gap: 4 }}>
-              <span className="tv-kicker">{etat.statut === "actif" ? `FORMULE ${f?.nom.toUpperCase() ?? ""}` : "ESSAI GRATUIT"}</span>
-              <strong style={{ fontSize: 20 }}>
-                {etat.ouvert
-                  ? `${etat.statut === "actif" ? "Actif" : "Essai en cours"} · ${jours} jour${jours > 1 ? "s" : ""} restant${jours > 1 ? "s" : ""}`
-                  : etat.statut === "actif" ? "Abonnement expiré" : "Essai terminé"}
-              </strong>
-              <span className="tv-gris" style={{ fontSize: 14 }}>
-                {etat.ouvert
-                  ? `${etat.statut === "actif" ? "Renouvellement à prévoir le" : "Fin de l'essai le"} ${jour(fin)}.${etat.statut === "actif" ? " Payer avant ajoute 30 jours à la date de fin." : ""}`
-                  : "Les publications automatiques sont arrêtées. Vos contenus restent accessibles. Choisissez une formule pour reprendre."}
-              </span>
-            </span>
-          </section>
-        ) : null}
-
-        {etat && !etat.paiement ? <p className="notice" role="status">Le paiement en ligne ouvre très bientôt.</p> : null}
-
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "stretch" }}>
-          {FORMULES.map((x) => {
-            const dispo = Boolean(etat?.paiement && etat.disponibles.includes(x.id) && !x.bientot);
-            const actuelle = etat?.statut === "actif" && etat.formule === x.id;
-            return (
-              <section key={x.id} className="tv-carte" aria-labelledby={`f-${x.id}`} style={{ flex: "1 1 260px", gap: 12, borderColor: x.id === "pro" ? "#2563EB" : undefined, borderWidth: x.id === "pro" ? 2 : undefined }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <h2 id={`f-${x.id}`} className="tv-h2" style={{ flex: 1, margin: 0 }}>{x.nom}</h2>
-                  {x.id === "pro" ? <span className="tv-pill" style={{ background: "#2563EB", color: "#fff" }}>CONSEILLÉ</span> : null}
-                  {actuelle ? <span className="tv-pill" style={{ background: "#D9F7E6", color: "#05603A" }}>VOTRE FORMULE</span> : null}
-                </span>
-                <span style={{ fontSize: 13, color: "#4B5563" }}>{x.pour}</span>
-                <span><strong style={{ fontSize: 30, fontFamily: "var(--font-mont)" }}>{prixTexte(x.prix)}</strong> <span className="tv-gris">/ mois</span></span>
-                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 14, lineHeight: 1.7, color: "#33425C", flex: 1 }}>
-                  {x.points.map((p) => <li key={p}>{p}</li>)}
-                </ul>
-                {x.bientot
-                  ? <span className="cnx-bientot" style={{ alignSelf: "flex-start" }}>Bientôt disponible</span>
-                  : <button type="button" className={`btn ${x.id === "pro" ? "primary" : ""}`} disabled={!dispo} onClick={() => setChoix(x.id)}>{actuelle ? "Renouveler 30 jours" : `Choisir ${x.nom}`}</button>}
-              </section>
-            );
-          })}
-        </div>
-
-        {choix && etat ? <FormPaiement formule={choix} etat={etat} fermer={() => setChoix(null)} /> : null}
-
-        {etat?.paiements.length ? (
-          <section className="tv-carte" aria-labelledby="t-hist" style={{ marginTop: 20, gap: 6 }}>
-            <h2 id="t-hist" className="tv-h2">Mes paiements</h2>
-            {etat.paiements.map((p, i) => (
-              <span key={i} style={{ fontSize: 14, color: "#33425C" }}>{jour(p.created_at)} · {formuleDe(p.formule)?.nom ?? p.formule} · {p.montant ? `${p.montant.toLocaleString("fr-FR")} ${p.devise === "XOF" ? "F" : p.devise ?? ""}` : ""}{p.fin ? ` · jusqu'au ${jour(p.fin)}` : ""}</span>
-            ))}
-          </section>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function FormPaiement({ formule, etat, fermer }: { formule: FormuleId; etat: Etat; fermer: () => void }) {
-  const x = formuleDe(formule)!;
-  const [prenom, ...reste] = etat.acheteur.nom.trim().split(/\s+/);
-  const contact = etat.acheteur.contact;
-  const [v, setV] = useState({
-    prenom: prenom ?? "", nom: reste.join(" "), email: contact.includes("@") ? contact : "",
-    telephone: contact.includes("@") ? "" : contact.replace(/\D/g, "").replace(/^(00)?226/, ""), pays: "BF",
-  });
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-  const maj = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setV({ ...v, [k]: e.target.value });
+  const emailConnu = Boolean(etat?.acheteur.contact.includes("@"));
+  const offertes = FORMULES.filter((x) => !x.bientot);
 
   async function payer(e: React.FormEvent) {
-    e.preventDefault(); setBusy(true); setErr("");
-    const r = await fetch("/api/abonnement", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ formule, ...v }) }).catch(() => null);
+    e.preventDefault();
+    if (!etat) return;
+    setBusy(true); setErreur("");
+    const [prenom, ...autres] = (etat.acheteur.nom || "").trim().split(/\s+/);
+    const r = await fetch("/api/abonnement", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ formule: choix, prenom: prenom || "Client", nom: autres.join(" ") || prenom || "Ovyo", email, telephone: tel, pays }),
+    }).catch(() => null);
     const d = r ? await r.json().catch(() => ({})) : {};
-    if (!r?.ok || !d.url) { setBusy(false); return setErr(d.error || "Paiement indisponible. Réessayez."); }
+    if (!r?.ok || !d.url) { setBusy(false); return setErreur(d.error || "Le paiement n'a pas pu s'ouvrir. Réessayez."); }
     window.location.href = d.url;
   }
 
   return (
-    <form className="tv-carte" onSubmit={payer} aria-labelledby="t-payer" style={{ marginTop: 20, gap: 14, border: "2px solid #2563EB" }}>
-      <div className="row" style={{ alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
-        <h2 id="t-payer" className="tv-h2" style={{ flex: 1, margin: 0 }}>Payer {x.nom} · {prixTexte(x.prix)}</h2>
-        <button type="button" className="btn small" onClick={fermer}>Annuler</button>
+    <div className="tv-page">
+      <div className="tv-corps ab-page">
+        <h1 className="tv-titre">Abonnement</h1>
+        {etat ? (
+          <p className="ab-statut">
+            {etat.ouvert
+              ? <>{etat.statut === "actif" ? `Formule ${formuleDe(etat.formule)?.nom ?? ""}` : "Essai gratuit"} · <strong>{jours} jour{jours > 1 ? "s" : ""}</strong> restant{jours > 1 ? "s" : ""} (jusqu&apos;au {jour(fin)})</>
+              : <><strong>{etat.statut === "actif" ? "Abonnement expiré." : "Essai terminé."}</strong> Vos publications automatiques sont en pause.</>}
+          </p>
+        ) : null}
+        {q.get("retour") ? <p className="notice vert" role="status">Merci ! Votre abonnement s&apos;active dès que le paiement est confirmé, en général en moins d&apos;une minute.</p> : null}
+
+        <form onSubmit={payer} className="ab-carte">
+          <fieldset className="ab-choix">
+            <legend className="sr-only">Formule</legend>
+            {offertes.map((x) => (
+              <label key={x.id} className={`ab-option${choix === x.id ? " ab-on" : ""}`}>
+                <input type="radio" name="formule" value={x.id} checked={choix === x.id} onChange={() => setChoix(x.id)} />
+                <span className="ab-option-h"><strong>{x.nom}</strong><span>{x.postsParMois} posts / mois</span></span>
+                <span className="ab-prix">{prixTexte(x.prix)}<small> / mois</small></span>
+              </label>
+            ))}
+          </fieldset>
+
+          <ul className="ab-points">{f.points.map((p) => <li key={p}>{p}</li>)}</ul>
+
+          <div className="ab-champ">
+            <label htmlFor="tel">Numéro Mobile Money</label>
+            <div className="ab-tel">
+              <select aria-label="Pays" value={pays} onChange={(e) => setPays(e.target.value)}>
+                {PAYS.map(([c, ind, n]) => <option key={c} value={c}>{ind} {n}</option>)}
+              </select>
+              <input id="tel" inputMode="tel" autoComplete="tel-national" value={tel} onChange={(e) => setTel(e.target.value)} placeholder="70 00 00 00" required />
+            </div>
+          </div>
+          {!emailConnu ? (
+            <div className="ab-champ">
+              <label htmlFor="mail">E-mail pour le reçu</label>
+              <input id="mail" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </div>
+          ) : null}
+
+          {erreur ? <p className="notice rouge" role="alert" style={{ margin: 0 }}>{erreur}</p> : null}
+          <button type="submit" className="ab-payer" disabled={busy || !etat || !etat.paiement}>
+            {busy ? "Ouverture du paiement…" : `Payer ${prixTexte(f.prix)}`}
+          </button>
+          <span className="ab-note">Orange Money · Moov Money · Wave · Carte · 30 jours, sans engagement{emailConnu ? ` · Reçu envoyé à ${email}` : ""}</span>
+        </form>
+
+        {etat?.paiements.length ? (
+          <details className="ab-histo">
+            <summary>Mes paiements ({etat.paiements.length})</summary>
+            {etat.paiements.map((p, i) => (
+              <div key={i}><span>{jour(p.created_at)} · {formuleDe(p.formule)?.nom ?? p.formule}</span><strong>{p.montant ? `${Number(p.montant).toLocaleString("fr-FR")} F` : ""}</strong></div>
+            ))}
+          </details>
+        ) : null}
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-        <label className="field" style={{ flex: "1 1 200px" }}>Prénom<input value={v.prenom} onChange={maj("prenom")} autoComplete="given-name" required /></label>
-        <label className="field" style={{ flex: "1 1 200px" }}>Nom<input value={v.nom} onChange={maj("nom")} autoComplete="family-name" required /></label>
-      </div>
-      <label className="field">E-mail (pour le reçu)<input type="email" value={v.email} onChange={maj("email")} autoComplete="email" required /></label>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-        <label className="field" style={{ flex: "1 1 180px" }}>Pays<select value={v.pays} onChange={maj("pays")}>{PAYS.map(([c, n]) => <option key={c} value={c}>{n}</option>)}</select></label>
-        <label className="field" style={{ flex: "2 1 220px" }}>Numéro qui va payer<input inputMode="tel" value={v.telephone} onChange={maj("telephone")} placeholder="70 00 00 00" autoComplete="tel-national" required /></label>
-      </div>
-      {err ? <p className="notice rouge" role="alert">{err}</p> : null}
-      <button type="submit" className="btn primary" disabled={busy} style={{ height: 50, fontSize: 16 }}>{busy ? "Ouverture du paiement…" : `Payer ${prixTexte(x.prix)}`}</button>
-      <span className="tv-gris" style={{ fontSize: 13 }}>Vous passez sur la page sécurisée de Chariow, puis revenez ici automatiquement.</span>
-    </form>
+    </div>
   );
 }
