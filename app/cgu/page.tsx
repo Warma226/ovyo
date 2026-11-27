@@ -70,8 +70,11 @@ const A: Article[] = [
     </>,
   },
   {
-    id: "remboursement", titre: "Remboursement",
-    contenu: <p>Une période de 30 jours entamée n&apos;est pas remboursable, le Client ayant pu tester gratuitement le service avant de payer. Toute demande liée à une erreur de paiement (double paiement, montant erroné) ou à une indisponibilité prolongée imputable à Ovyo est examinée au cas par cas, sur demande écrite à <a href="mailto:warmachinertech@gmail.com">warmachinertech@gmail.com</a> dans les 14 jours suivant le paiement.</p>,
+    id: "remboursement", titre: "Absence de remboursement",
+    contenu: <>
+      <p>Tout paiement est <strong>ferme et définitif</strong> : aucune somme versée n&apos;est remboursée, quel qu&apos;en soit le motif, y compris en cas de non-utilisation du service ou de fermeture de l&apos;espace en cours de période.</p>
+      <p>L&apos;essai gratuit de 7 jours permet au Client de tester Ovyo avant tout paiement. Chaque paiement reçu ajoute 30 jours à l&apos;abonnement : un paiement effectué deux fois prolonge donc l&apos;accès d&apos;autant, sans remboursement.</p>
+    </>,
   },
   {
     id: "fin", titre: "Fin d'abonnement, suspension et fermeture",
