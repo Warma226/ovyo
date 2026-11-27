@@ -1409,3 +1409,25 @@ h1, h2, h3, .section-title, .topbar .title, .tv-h2, .tv-titre, .tv-studio-h2, .t
   .lp-fil { display: none; }
   .lp-tuile { zoom: .72; }
 }
+
+/* ===== Administration de la plateforme (app/plateforme) ===== */
+.pa-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.pa-kpi { background: #FFFFFF; border: 1px solid #E6EAF2; border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+.pa-onglet { border: 1.5px solid #E5E7EB; background: #FFFFFF; border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13.5px; font-weight: 600; color: #33425C; cursor: pointer; min-height: 38px; }
+.pa-onglet[aria-selected="true"] { background: #0B1B3F; border-color: #0B1B3F; color: #FFFFFF; }
+.pa-ligne { border-top: 1px solid #EEF1F5; }
+.pa-resume { width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 14px 4px; background: none; border: 0; font: inherit; color: inherit; cursor: pointer; min-height: 56px; }
+.pa-resume:hover { background: #F8FAFD; }
+.pa-av { width: 40px; height: 40px; border-radius: 12px; color: #FFFFFF; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex: none; }
+.pa-av img { width: 100%; height: 100%; object-fit: cover; background: #FFFFFF; }
+.pa-col { flex: 0 0 auto; min-width: 120px; font-size: 13.5px; color: #33425C; text-align: left; }
+.pa-pastille { display: inline-block; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.pa-detail { padding: 4px 4px 18px 60px; display: flex; flex-direction: column; gap: 16px; }
+.pa-dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 20px; }
+.pa-dl dt { font-size: 12px; color: #5B6577; }
+.pa-dl dd { margin: 2px 0 0; font-size: 14px; font-weight: 600; color: #0B1B3F; overflow-wrap: anywhere; }
+.pa-actions { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px dashed #E3E7EF; }
+.pa-champ { border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 8px 10px; font: inherit; font-size: 14px; background: #FFFFFF; min-height: 38px; }
+.pa-mini { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid #EEF1F5; font-size: 14px; }
+.pa-mini small { display: block; font-size: 12.5px; color: #5B6577; font-weight: 400; margin-top: 2px; }
+@media (max-width: 700px) { .pa-masque { display: none; } .pa-detail { padding-left: 4px; } }

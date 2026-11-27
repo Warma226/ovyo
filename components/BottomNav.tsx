@@ -51,6 +51,7 @@ const MENU: { href: string; label: string; d: string; badge?: "grin" }[] = [
   { href: "/declencheurs", label: "Déclencheurs", d: NAV_ICONS.eclair },
   { href: "/connexions", label: "Connexions", d: NAV_ICONS.cnx },
   { href: "/abonnement", label: "Abonnement", d: "M3 6h18v12H3zM3 10h18M7 15h4" },
+  { href: "/plateforme", label: "Administration", d: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4zM9 12l2 2 4-4" },
 ];
 
 const ONGLETS: { href: string; label: string; d: string }[] = [
@@ -67,9 +68,15 @@ type Etat = { autopilot: boolean; grin: number } | null;
 export function BottomNav() {
   const path = usePathname();
   const [etat, setEtat] = useState<Etat>(null);
+  const [superAdmin, setSuperAdmin] = useState(false);
   const moi = useMoi();
   const marque = useMarque();
-  const voit = (href: string) => !moi || lienVisible(moi.role, href);
+  const voit = (href: string) => (href === "/plateforme" ? superAdmin : !moi || lienVisible(moi.role, href));
+  // Lien « Administration » : seulement pour l'équipe Ovyo (vérifié par le serveur).
+  useEffect(() => {
+    if (moi?.role !== "admin") return;
+    fetch("/api/plateforme?verifier=1", { cache: "no-store" }).then((r) => setSuperAdmin(r.ok)).catch(() => {});
+  }, [moi?.role]);
   useEffect(() => {
     if (path.startsWith("/acces") || path.startsWith("/invitation") || path.startsWith("/inscription") || path.startsWith("/bienvenue")) return;
     fetch("/api/tableau?leger=1", { cache: "no-store" })

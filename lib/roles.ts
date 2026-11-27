@@ -27,7 +27,7 @@ export const peut = (role: Role, zone: Zone, ecrire = false) => {
 const PAGES: [string, Zone | null][] = [
   ["/compte", null], ["/apercu", null], ["/calendrier", "calendrier"], ["/veille", "veille"], ["/videos", "veille"], ["/rubriques", "creer"],
   ["/creer", "creer"], ["/editeur", "creer"], ["/studio", "studio"], ["/minute-cyber", "studio"], ["/communaute", "grin"],
-  ["/mediatheque", "admin"], ["/connexions", "admin"], ["/abonnement", "admin"], ["/declencheurs", "admin"], ["/sources", "admin"],
+  ["/mediatheque", "admin"], ["/connexions", "admin"], ["/abonnement", "admin"], ["/plateforme", "admin"], ["/declencheurs", "admin"], ["/sources", "admin"],
 ];
 export function zonePage(path: string): Zone | null | undefined {
   if (path === "/") return null;
@@ -48,7 +48,7 @@ const API: [string, Zone | null, Zone | null][] = [
   ["/api/upload", null, "publier"], ["/api/upload-url", null, "publier"],
   ["/api/studio", "studio", "studio"], ["/api/minute", "studio", "studio"], ["/api/voix", "studio", "studio"],
   ["/api/cm", "grin", "grin"],
-  ["/api/membres", "admin", "admin"], ["/api/abonnement", "admin", "admin"], ["/api/mediatheque", "admin", "admin"], ["/api/connexions", "admin", "admin"],
+  ["/api/membres", "admin", "admin"], ["/api/abonnement", "admin", "admin"], ["/api/plateforme", "admin", "admin"], ["/api/mediatheque", "admin", "admin"], ["/api/connexions", "admin", "admin"],
   ["/api/sources", "admin", "admin"], ["/api/tiktok", "admin", "admin"],
 ];
 export function apiAutorisee(role: Role, path: string, methode: string): boolean {
